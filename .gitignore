@@ -1,0 +1,4 @@
+/env_lb/
+*.pyc
+migrations/
+secrets.py
