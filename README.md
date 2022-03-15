@@ -2,13 +2,19 @@
 
 ## Setup
 
-In the root path, run ``python3 -m venv env_lb``.
+In the project root path, run ``python3 -m venv env_lb``.
 
 Then, run ``source ./env_lb/bin/activate``.
 
 Then, install Django ``pip install django`` and VUE ``npm install --global vue-cli``.
 
-To support Postgresql, intall Psycopg2 ``pip install psycopg2``
+To support Postgresql, intall Psycopg2 ``pip install psycopg2``.
+
+Update the ``DATABASES`` in ``backend/backend/settings.py``.
+
+Run ``python manage.py makemigrations``. Then run ``python manage.py migrate``.
+
+Run ``python manage.py runserver``.
 
 ## Reference Website (Internal Review)
 
