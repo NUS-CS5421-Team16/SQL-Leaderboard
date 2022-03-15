@@ -56,7 +56,7 @@ Then, install Django ``pip install django`` and VUE ``npm install --global vue-c
 │   │   └── views.py
 │   ├── __init__.py
 │   ├── manage.py
-│   └── source
+│   └── backend
 │       ├── __init__.py
 │       ├── settings.py
 │       ├── urls.py
