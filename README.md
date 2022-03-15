@@ -1,6 +1,7 @@
 # SQL-Leaderboard
 
 ## Reference Structure
+```bash
 .
 ├── client/  # Frontend - vue
 │   ├── build/
@@ -53,3 +54,4 @@
 ├── spiders/
 ├── templates/  
 └── VERSION
+```
