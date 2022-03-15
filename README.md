@@ -2,7 +2,9 @@
 
 ## Setup
 
-In the root path, run ``source ./env_lb/bin/activate``.
+In the root path, run ``python3 -m venv env_lb``.
+
+Then, run ``source ./env_lb/bin/activate``.
 
 ## Reference Structure
 ```bash
