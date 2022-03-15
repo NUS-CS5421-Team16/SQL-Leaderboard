@@ -6,7 +6,7 @@ In the project root path, run ``python3 -m venv env_lb``.
 
 Then, run ``source ./env_lb/bin/activate``.
 
-Then, install Django ``pip install django`` and VUE ``npm install --global vue-cli``.
+Then, install Django ``python -m pip install django`` and VUE ``npm install --global vue-cli``. Besides, we need to install Django REST  ``python -m pip install djangorestframework``
 
 To support Postgresql, intall Psycopg2 ``pip install psycopg2``.
 
