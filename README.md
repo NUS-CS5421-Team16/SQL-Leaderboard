@@ -1,9 +1,14 @@
 # SQL-Leaderboard
 
+## Setup
+
+In the root path, run ``source ./env_lb/bin/activate``.
+
 ## Reference Structure
 ```bash
 .
-├── client/  # Frontend - vue
+├── env_lb/    # Python Virtual Environment
+├── frontend/  # Frontend - vue
 │   ├── build/
 │   ├── server/
 │   ├── src/  
@@ -17,7 +22,7 @@
 │   ├── theme/
 │   └── twistd.pid
 ├── __init__.py
-├── server/  # Django
+├── backend/  # Backend - Django
 │   ├── core  # Django（app）
 │   │   ├── admin.py
 │   │   ├── apps.py
@@ -46,12 +51,11 @@
 │   │   └── views.py
 │   ├── __init__.py
 │   ├── manage.py
-│   └── server
+│   └── source
 │       ├── __init__.py
 │       ├── settings.py
 │       ├── urls.py
 │       └── wsgi.py
-├── spiders/
 ├── templates/  
-└── VERSION
+└── README.md
 ```
