@@ -10,7 +10,17 @@ Then, install Django ``pip install django`` and VUE ``npm install --global vue-c
 
 To support Postgresql, intall Psycopg2 ``pip install psycopg2``
 
-## Reference Structure
+## Reference Website (Internal Review)
+
+[Django Docs](https://docs.djangoproject.com/en/4.0/intro/)
+
+[Django QuerySet](https://docs.djangoproject.com/en/4.0/ref/models/querysets/#select-for-update)
+
+[Django with Postgresql](https://stackoverflow.com/questions/5394331/how-to-set-up-a-postgresql-database-in-django)
+
+[VUE + Django](https://blog.logrocket.com/how-to-build-vue-js-app-django-rest-framework/)
+
+## Reference Structure (Internal Review)
 
 ```bash
 .
