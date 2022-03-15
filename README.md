@@ -8,6 +8,8 @@ Then, run ``source ./env_lb/bin/activate``.
 
 Then, install Django ``pip install django`` and VUE ``npm install --global vue-cli``.
 
+To support Postgresql, intall Psycopg2 ``pip install psycopg2``
+
 ## Reference Structure
 
 ```bash
