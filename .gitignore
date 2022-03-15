@@ -1,3 +1,4 @@
 /env_lb/
-*/__pycache__
+*.pyc
 */migrations
+secrets.py
