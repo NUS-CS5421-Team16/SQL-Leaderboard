@@ -1,20 +1,61 @@
 # SQL-Leaderboard
 
-## Setup
+## Setup Developing Environment
 
-In the project root path, run ``python3 -m venv env_lb``.
-
-Then, run ``source ./env_lb/bin/activate``.
-
-Then, install Django ``python -m pip install django`` and VUE ``npm install --global vue-cli``. Besides, we need to install Django REST  ``python -m pip install djangorestframework``
-
-To support Postgresql, intall Psycopg2 ``pip install psycopg2``.
-
-Update the ``DATABASES`` in ``backend/backend/settings.py``.
-
-Run ``python manage.py makemigrations``. Then run ``python manage.py migrate``.
-
-Run ``python manage.py runserver``.
+### Backend
+1. Install `python3.9`.
+2. Run your favourite python environment management tool to create an env based on `requirements.txt`
+   ```
+   # venv
+   python3 -m venv env_lb
+   source ./env_lb/bin/activate
+   pip install -r requirements.txt
+   
+   # pipenv
+   pipenv --python 3.9
+   pipenv shell
+   pip install -r requirements.txt
+   ```
+3. Configure your database in `/backend/backend/settings.py`, remember to create databases(`Leaderboard`,`PrivateDataset`,`PublicDataset`) in postgresql in advance.
+   ```python
+   # /backend/backend/settings.py
+   ...
+   DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'Leaderboard',
+        'USER': 'youruser',
+        'PASSWORD': 'yourpassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'private': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'PrivateDataset',
+        'USER': 'youruser',
+        'PASSWORD': 'yourpassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'public': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'PublicDataset',
+        'USER': 'youruser',
+        'PASSWORD': 'yourpassword',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    }
+   ...
+   ```
+4. Run migrate if necessary.
+   ```shell
+   python manage.py migrate
+   ```
+5. Start your server.
+   ```shell
+   python manage.py runserver 0.0.0.0:8000
+   ```
 
 ## Reference Website (Internal Review)
 
