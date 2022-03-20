@@ -16,7 +16,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+from rest_framework_nested import routers
+
+
 urlpatterns = [
+    path('competition/', include('competition.urls')),
     path('submissions/', include('submissions.urls')),
     path('admin/', admin.site.urls),
 ]
