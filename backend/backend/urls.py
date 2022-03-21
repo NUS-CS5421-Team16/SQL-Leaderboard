@@ -16,7 +16,14 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 
+
+import competitor.views
+
 urlpatterns = [
+    path('register', competitor.views.register),
+    path('login', competitor.views.login),
+    path('competition/', include('competition.urls')),
+    path('competitor/', include('competitor.urls')),
     path('submissions/', include('submissions.urls')),
     path('admin/', admin.site.urls),
 ]
