@@ -23,6 +23,8 @@ class CompetitionViewset(viewsets.ModelViewSet):
         return super(CompetitionViewset, self).retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
+        # TODO: if have 1 valid competition, skip
+
         with atomic():
             create_serailizer = self.get_serializer(data=request.data)
             create_serailizer.is_valid(raise_exception=True)
@@ -94,6 +96,9 @@ class CompetitionViewset(viewsets.ModelViewSet):
         })
         public_query_task_serializer.is_valid(raise_exception=True)
         public_query_task_serializer.save()
+
+        # TODO: run tasks
+
 
     def load_competitors(self, competitor_info, competition):
         for line in competitor_info:

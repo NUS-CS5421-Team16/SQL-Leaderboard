@@ -41,9 +41,15 @@ class SetupTask(Task):
     def get_task_path(self):
         return f"tasks/f{self.__class__.__name__}/{self.setup_type}.sql"
 
+    def run(self):
+        pass
+
 
 class QueryTask(Task):
     competitor = models.ForeignKey(Competitor, on_delete=models.CASCADE, null=False)
 
     def get_task_path(self):
         return f"tasks/f{self.__class__.__name__}/{self.competitor.name}.sql"
+
+    def run(self):
+        pass
