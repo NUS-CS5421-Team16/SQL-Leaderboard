@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'submissions.apps.SubmissionsConfig',
     'competition.apps.CompetitionConfig',
     'competitor.apps.CompetitorConfig',
     'task.apps.TaskConfig',
