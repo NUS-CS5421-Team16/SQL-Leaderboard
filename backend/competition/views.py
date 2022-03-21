@@ -3,7 +3,8 @@ import uuid
 from django.db.transaction import atomic
 from rest_framework import viewsets, status
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAdminUser
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAdminUser, IsAuthenticated
 from rest_framework.response import Response
 
 from competition.models import Competition
@@ -17,6 +18,9 @@ class CompetitionViewset(viewsets.ModelViewSet):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
     permission_classes = [IsAdminUser]
+
+    def retrieve(self, request, *args, **kwargs):
+        return super(CompetitionViewset, self).retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
         with atomic():
@@ -48,6 +52,12 @@ class CompetitionViewset(viewsets.ModelViewSet):
             self.load_competitors(competitor_info, competition_instance)
 
         return Response(status=status.HTTP_200_OK, data=update_serializer.data)
+
+    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
+    def rank(self, request, *args, **kwargs):
+        print(kwargs)
+        print(request.user)
+        return Response(status=status.HTTP_200_OK, data={})
 
     def create_setup_task(self, competition_id, request_data):
         # create setup tasks
