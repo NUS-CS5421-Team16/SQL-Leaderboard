@@ -24,6 +24,5 @@ urlpatterns = [
     path('login', competitor.views.login),
     path('competition/', include('competition.urls')),
     path('competitor/', include('competitor.urls')),
-    path('submissions/', include('submissions.urls')),
     path('admin/', admin.site.urls),
 ]
