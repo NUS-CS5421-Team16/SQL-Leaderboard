@@ -2,3 +2,4 @@
 *.pyc
 backend/Pipfile
 backend/upload
+.idea
