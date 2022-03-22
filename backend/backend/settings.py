@@ -12,8 +12,6 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 
 from pathlib import Path
 
-from .secrets import *
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -21,7 +19,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
 
-# Create secrets.py to store SECRET_KEY
+SECRET_KEY = 'django-insecure-xyjz&gal6&xysxv2_xsih%3!1xe*uzaf^uf0jd94feimj9dt$9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -39,7 +37,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
-    'submissions.apps.SubmissionsConfig',
+    'rest_framework.authtoken',
+    'competition.apps.CompetitionConfig',
+    'competitor.apps.CompetitorConfig',
+    'task.apps.TaskConfig',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,13 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ]
+}
 
 ROOT_URLCONF = 'backend.urls'
 
@@ -78,15 +86,29 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        # 'ENGINE': 'django.db.backends.sqlite3',
-        # 'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'Leaderboard',
-        'USER': 'postgres',
-        'PASSWORD': 'admin',
+        'USER': 'vincent',
+        'PASSWORD': '990130',
         'HOST': 'localhost',
         'PORT': '5432',
-    }
+    },
+    'private': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'PrivateDataset',
+        'USER': 'vincent',
+        'PASSWORD': '990130',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
+    'public': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'PublicDataset',
+        'USER': 'vincent',
+        'PASSWORD': '990130',
+        'HOST': 'localhost',
+        'PORT': '5432',
+    },
 }
 
 
@@ -125,6 +147,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+MEDIA_ROOT = 'upload'
+MEDIA_URL = 'upload/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field

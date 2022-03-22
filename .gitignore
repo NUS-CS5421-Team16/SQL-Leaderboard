@@ -1,4 +1,4 @@
 /env_lb/
 *.pyc
-migrations/
-secrets.py
+backend/Pipfile
+backend/upload
