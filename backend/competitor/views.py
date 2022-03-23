@@ -55,6 +55,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"Please check the uuid or team name"})
 
+        #TODO: Update the Response Json File based on the API File
         return Response(status=status.HTTP_200_OK, data=serializers.serialize('json', [target_team, ]))
 
     @action(detail=True, methods=['POST', 'GET'])
