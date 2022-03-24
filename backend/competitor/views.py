@@ -2,13 +2,14 @@ from django.shortcuts import render
 
 # Create your views here.
 from rest_framework import viewsets, status
-from django.core import serializers
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from competitor.models import Competitor, Team
 from competitor.serializer import CompetitorSerializer, TeamSerializer
+
+from task.serializer import QueryTaskSerializer
 
 
 @api_view(['POST'])
@@ -34,34 +35,37 @@ class CompetitorViewset(viewsets.ModelViewSet):
         return super(CompetitorViewset, self).retrieve(request, *args, **kwargs)
 
     @action(detail=True, methods=['PUT'])
-    def team(self, request, pk=None):
+    def team(self, request, *args, **kwargs):
         # change team detail
         try:
-            competitor = Competitor.objects.get(pk=pk)
+            competitor = Competitor.objects.get(pk=kwargs.get('pk'))
             current_team = competitor.team
             current_team_uuid = competitor.team.uuid
             target_team_uuid = request.data['team_uuid']
             target_team = Team.objects.get(uuid=target_team_uuid)
             if current_team_uuid == target_team_uuid and str(current_team.name) != str(request.data['team_name']):
                 Team.objects.filter(uuid=target_team_uuid).update(name=request.data['team_name'])
-                print("[Update Team Name] ", target_team.name, " -> ", request.data['team_name'])
+                # print("[Update Team Name] ", target_team.name, " -> ", request.data['team_name'])
             elif current_team_uuid != target_team_uuid and target_team.name == request.data['team_name']:
                 competitor.team = target_team
                 competitor.save()
                 current_team.delete()
-                print("[Combine Teams] ", current_team.name, " -> ", target_team.name)
+                # print("[Combine Teams] ", current_team.name, " -> ", target_team.name)
             else:
-                return Response(status=status.HTTP_400_BAD_REQUEST, data={"Please check the uuid or team name"})
-        except:
-            return Response(status=status.HTTP_400_BAD_REQUEST, data={"Please check the uuid or team name"})
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "Please check the uuid or team name"})
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": f"Please check the uuid or team name. ERROR: {str(e)}"})
 
-        json_data = {}
-        json_data['id'] = target_team.id
-        json_data['name'] = competitor.username
-        json_data['team_uuid'] = target_team.uuid
-        json_data['team_name'] = request.data['team_name']
+        json_data = {'id': target_team.id,
+                     'name': competitor.username,
+                     'team_uuid': target_team.uuid,
+                     'team_name': request.data['team_name']
+                     }
         if target_team.best_public_task is not None:
-            json_data['best_public_task'] = serializers.serialize('json', [target_team.best_public_task, ])
+            task_serializer = QueryTaskSerializer(target_team.best_public_task)
+            json_data['best_public_task'] = task_serializer.data
         else:
             json_data['best_public_task'] = {}
         json_data['remain_upload_times'] = target_team.remain_upload_times
