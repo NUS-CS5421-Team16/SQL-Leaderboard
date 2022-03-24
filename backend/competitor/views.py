@@ -56,7 +56,18 @@ class CompetitorViewset(viewsets.ModelViewSet):
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"Please check the uuid or team name"})
 
         #TODO: Update the Response Json File based on the API File
-        return Response(status=status.HTTP_200_OK, data=serializers.serialize('json', [target_team, ]))
+        json_data = {}
+        json_data['id'] = target_team.id
+        json_data['name'] = competitor.username
+        json_data['team_uuid'] = target_team.uuid
+        json_data['team_name'] = request.data['team_name']
+        if target_team.best_public_task is not None:
+            json_data['best_public_task'] = serializers.serialize('json', [target_team.best_public_task, ])
+        else:
+            json_data['best_public_task'] = {}
+        json_data['remain_upload_times'] = target_team.remain_upload_times
+
+        return Response(status=status.HTTP_200_OK, data=json_data)
 
     @action(detail=True, methods=['POST', 'GET'])
     def task(self, request, *args, **kwargs):
