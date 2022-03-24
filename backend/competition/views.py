@@ -13,6 +13,8 @@ from competitor.serializer import CompetitorSerializer, TeamSerializer
 from task.models import SetupTask
 from task.serializer import SetupTaskSerializer
 
+from competitor.models import Team
+
 
 class CompetitionViewset(viewsets.ModelViewSet):
     queryset = Competition.objects.all()
@@ -57,9 +59,28 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
-        print(kwargs)
-        print(request.user)
-        return Response(status=status.HTTP_200_OK, data={})
+        is_private = int(request.query_params.get('private'))
+        is_desc = int(request.query_params.get('ordering'))
+        json_data = {}
+        if not is_private:
+            print(1)
+            # teams = Team.objects.filter(best_public_task__status='success').order_by('best_public_task__result')
+            if is_desc:
+                teams = Team.objects.all().order_by('-best_public_task__result', 'entry', 'best_public_task__start_time')
+            else:
+                teams = Team.objects.all().order_by('best_public_task__result', 'entry', 'best_public_task__start_time')
+            # teams = Team.objects.all()
+            teams_serializer = TeamSerializer(teams, many=True)
+            teams_data = teams_serializer.data
+            invalid_teams = []
+            for idx, item in enumerate(teams_data):
+                if 'task_status' not in item:
+                    invalid_teams.append(item)
+                else:
+                    json_data[idx+1] = item
+        if invalid_teams is not None:
+            json_data[-1] = invalid_teams
+        return Response(status=status.HTTP_200_OK, data=json_data)
 
     def create_setup_task(self, competition_id, request_data):
         # create setup tasks
