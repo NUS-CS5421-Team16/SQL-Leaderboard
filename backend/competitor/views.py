@@ -55,7 +55,6 @@ class CompetitorViewset(viewsets.ModelViewSet):
         except:
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"Please check the uuid or team name"})
 
-        #TODO: Update the Response Json File based on the API File
         json_data = {}
         json_data['id'] = target_team.id
         json_data['name'] = competitor.username
