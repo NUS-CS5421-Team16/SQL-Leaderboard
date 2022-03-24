@@ -10,7 +10,7 @@ class Team(models.Model):
     remain_upload_times = models.IntegerField(blank=False, null=False)
     best_private_task = models.ForeignKey("task.QueryTask", on_delete=models.CASCADE, null=True, related_name='private_team', related_query_name='private_team')
     best_public_task = models.ForeignKey("task.QueryTask", on_delete=models.CASCADE, null=True, related_name='public_team', related_query_name='public_team')
-    entry = models.IntegerField(null=True)
+    entries = models.IntegerField(null=True)
 
 
 class Competitor(User):

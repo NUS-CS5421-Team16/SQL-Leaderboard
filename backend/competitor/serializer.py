@@ -4,19 +4,35 @@ from rest_framework.validators import UniqueValidator
 
 from competitor.models import Competitor, Team
 
-from task.serializer import QueryTaskSerializer
-
 
 class TeamSerializer(serializers.ModelSerializer):
     name = serializers.CharField(max_length=128, validators=[UniqueValidator(queryset=Team.objects.all())])
+
+    class Meta:
+        model = Team
+        fields = '__all__'
+
+
+class PublicTeamSerializer(TeamSerializer):
     status = ReadOnlyField(source='best_public_task.status')
     start_time = ReadOnlyField(source='best_public_task.start_time')
+    end_time = ReadOnlyField(source='best_public_task.end_time')
     running_time = ReadOnlyField(source='best_public_task.result')
 
     class Meta:
         model = Team
-        # fields = '__all__'
-        fields = ['id', 'status', 'start_time', 'running_time', 'name', 'entry']
+        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'name', 'entries']
+
+
+class PrivateTeamSerializer(TeamSerializer):
+    status = ReadOnlyField(source='best_private_task.status')
+    start_time = ReadOnlyField(source='best_private_task.start_time')
+    end_time = ReadOnlyField(source='best_private_task.end_time')
+    running_time = ReadOnlyField(source='best_private_task.result')
+
+    class Meta:
+        model = Team
+        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'name', 'entries']
 
 
 class CompetitorSerializer(serializers.ModelSerializer):
