@@ -16,7 +16,7 @@ class Task(models.Model):
 
     status = models.CharField(max_length=32, choices=Status.choices, blank=False, null=False, default=Status.PENDING)
     sql = models.FileField(upload_to=get_task_path, null=True)
-    result = models.TextField(null=True)
+    result = models.IntegerField(null=True)
     start_time = models.DateTimeField(auto_now=True)
     end_time = models.DateTimeField(null=True)
     previous_task = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
