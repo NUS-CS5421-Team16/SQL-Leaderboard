@@ -6,8 +6,10 @@ from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from competitor.models import Competitor
-from competitor.serializer import CompetitorSerializer
+from competitor.models import Competitor, Team
+from competitor.serializer import CompetitorSerializer, TeamSerializer
+
+from task.serializer import QueryTaskSerializer
 
 
 @api_view(['POST'])
@@ -35,8 +37,40 @@ class CompetitorViewset(viewsets.ModelViewSet):
     @action(detail=True, methods=['PUT'])
     def team(self, request, *args, **kwargs):
         # change team detail
+        try:
+            competitor = Competitor.objects.get(pk=kwargs.get('pk'))
+            current_team = competitor.team
+            current_team_uuid = competitor.team.uuid
+            target_team_uuid = request.data['team_uuid']
+            target_team = Team.objects.get(uuid=target_team_uuid)
+            if current_team_uuid == target_team_uuid and str(current_team.name) != str(request.data['team_name']):
+                Team.objects.filter(uuid=target_team_uuid).update(name=request.data['team_name'])
+                # print("[Update Team Name] ", target_team.name, " -> ", request.data['team_name'])
+            elif current_team_uuid != target_team_uuid and target_team.name == request.data['team_name']:
+                competitor.team = target_team
+                competitor.save()
+                current_team.delete()
+                # print("[Combine Teams] ", current_team.name, " -> ", target_team.name)
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "Please check the uuid or team name"})
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": f"Please check the uuid or team name. ERROR: {str(e)}"})
 
-        return Response(status=status.HTTP_200_OK, data={})
+        json_data = {'id': target_team.id,
+                     'name': competitor.username,
+                     'team_uuid': target_team.uuid,
+                     'team_name': request.data['team_name']
+                     }
+        if target_team.best_public_task is not None:
+            task_serializer = QueryTaskSerializer(target_team.best_public_task)
+            json_data['best_public_task'] = task_serializer.data
+        else:
+            json_data['best_public_task'] = {}
+        json_data['remain_upload_times'] = target_team.remain_upload_times
+
+        return Response(status=status.HTTP_200_OK, data=json_data)
 
     @action(detail=True, methods=['POST', 'GET'])
     def task(self, request, *args, **kwargs):
