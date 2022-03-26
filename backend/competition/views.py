@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 
 from django.db.transaction import atomic
 from rest_framework import viewsets, status
@@ -59,8 +60,12 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
-        is_private = bool(int(request.query_params.get('private')))
-        is_desc = bool(int(request.query_params.get('ordering')))
+        try:
+            is_private = bool(int(request.query_params.get('private')))
+            is_desc = bool(int(request.query_params.get('ordering')))
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": f"Please Check the URL. ERROR: {str(e)}"})
         json_data = {}
         if not is_private:
             if is_desc:
@@ -71,6 +76,11 @@ class CompetitionViewset(viewsets.ModelViewSet):
                                                     'best_public_task__start_time')
             teams_serializer = PublicTeamSerializer(teams, many=True)
         else:
+            competition_deadline = Competition.objects.first().end_time
+            if competition_deadline > timezone.now():
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "Cannot check the private leaderboard's results now."})
+
             if is_desc:
                 teams = Team.objects.all().order_by('-best_private_task__result', 'entries',
                                                     'best_private_task__start_time')
@@ -88,6 +98,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
                 json_data[idx+1] = item
         if len(invalid_teams) > 0:
             json_data[-1] = invalid_teams
+
         return Response(status=status.HTTP_200_OK, data=json_data)
 
     def create_setup_task(self, competition_id, request_data):
