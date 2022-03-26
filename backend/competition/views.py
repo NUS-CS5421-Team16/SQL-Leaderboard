@@ -59,8 +59,8 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
-        is_private = int(request.query_params.get('private'))
-        is_desc = int(request.query_params.get('ordering'))
+        is_private = bool(int(request.query_params.get('private')))
+        is_desc = bool(int(request.query_params.get('ordering')))
         json_data = {}
         if not is_private:
             if is_desc:
