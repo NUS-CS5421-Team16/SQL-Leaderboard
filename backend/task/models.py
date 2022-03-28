@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from competitor.models import Competitor, Competition
@@ -24,7 +25,7 @@ class Task(models.Model):
     def check_safety(self):
         pass
 
-    def run(self):
+    def run(self, **kwargs):
         pass
 
 
@@ -39,17 +40,38 @@ class SetupTask(Task):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE, null=False)
 
     def get_task_path(self):
-        return f"tasks/f{self.__class__.__name__}/{self.setup_type}.sql"
+        return f"tasks/{self.__class__.__name__}/{self.setup_type}.sql"
 
     def run(self):
-        pass
+        if "create" in self.setup_type:
+            save_result = False
+        else:
+            save_result = True
+
+        if "private" in self.setup_type:
+            database = settings.PRIVATE_DATABASE
+        else:
+            database = settings.PUBLIC_DATABASE
+
+        super(SetupTask, self).run(save_result=save_result, database=database)
 
 
 class QueryTask(Task):
+    class QueryTaskType(models.TextChoices):
+        PRIVATE = "private"
+        PUBLIC = "public"
+
+    query_type = models.CharField(max_length=32, choices=QueryTaskType.choices, null=True)
     competitor = models.ForeignKey(Competitor, on_delete=models.CASCADE, null=False)
 
     def get_task_path(self):
-        return f"tasks/f{self.__class__.__name__}/{self.competitor.name}.sql"
+        return f"tasks/{self.__class__.__name__}/{self.competitor.name}.sql"
 
     def run(self):
-        pass
+        if "private" in self.setup_type:
+            database = settings.PRIVATE_DATABASE
+        else:
+            database = settings.PUBLIC_DATABASE
+        super(QueryTask, self).run(save_result=True, database=database)
+
+        # update best_task of the team if needed

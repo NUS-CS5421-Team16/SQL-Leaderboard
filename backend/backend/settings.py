@@ -84,6 +84,9 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+PRIVATE_DATABASE = "private"
+PUBLIC_DATABASE = "public"
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -93,7 +96,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     },
-    'private': {
+    PRIVATE_DATABASE: {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'PrivateDataset',
         'USER': 'postgres',
@@ -101,7 +104,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     },
-    'public': {
+    PUBLIC_DATABASE: {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'PublicDataset',
         'USER': 'postgres',

@@ -18,7 +18,7 @@ class CompetitorSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Competitor
-        fields = ['username', 'email', 'competition', 'team']
+        fields = ['id', 'username', 'email', 'competition', 'team']
 
     def create(self, validated_data):
         return super(CompetitorSerializer, self).create(validated_data)

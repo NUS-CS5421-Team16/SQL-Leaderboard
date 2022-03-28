@@ -1,17 +1,14 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
-from django.shortcuts import render
-from rest_framework.authtoken.models import Token
-
-# Create your views here.
 from rest_framework import viewsets, status
+from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from competitor.models import Competitor, Team
-from competitor.serializer import CompetitorSerializer, TeamSerializer
-
+from competitor.serializer import CompetitorSerializer
+from task.models import QueryTask
 from task.serializer import QueryTaskSerializer
 
 
@@ -76,7 +73,28 @@ class CompetitorViewset(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
 
     def retrieve(self, request, *args, **kwargs):
-        return super(CompetitorViewset, self).retrieve(request, *args, **kwargs)
+        # check permission
+        user_id = int(kwargs.get("pk"))
+        if not request.user.is_superuser and request.user.id != user_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "permission denied!"})
+
+        competitor_instance = Competitor.objects.get(id=user_id)
+
+        team = competitor_instance.team
+        tasks = QueryTask.objects.filter(competitor__team=team).order_by("start_time")
+        tasks_serializer = QueryTaskSerializer(tasks, many=True)
+        latest_task_serializer = QueryTaskSerializer(tasks.first())
+
+        result_data = {
+            "id": competitor_instance.id,
+            "name": request.user.username,
+            "team_uuid": competitor_instance.team.uuid,
+            "team_name": competitor_instance.team.name,
+            "latest_task": latest_task_serializer.data,
+            "tasks": tasks_serializer.data,
+            "remain_upload_times": team.remain_upload_times
+        }
+        return Response(status=status.HTTP_200_OK, data=result_data)
 
     @action(detail=True, methods=['PUT'])
     def team(self, request, *args, **kwargs):
@@ -118,11 +136,17 @@ class CompetitorViewset(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['POST', 'GET'])
     def task(self, request, *args, **kwargs):
+        # check permission
+        user_id = int(kwargs.get("pk"))
+        if not request.user.is_superuser and request.user.id != user_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "permission denied!"})
+
         # create task
         if request.method == 'POST':
 
             return Response(status=status.HTTP_200_OK, data={})
         # retrieve latest task of the team
         elif request.method == 'GET':
-
-            return Response(status=status.HTTP_200_OK, data={})
+            competitor_instance = Competitor.objects.get(pk=user_id)
+            task_serializer = QueryTaskSerializer(competitor_instance.team.best_private_task)
+            return Response(status=status.HTTP_200_OK, data=task_serializer.data)
