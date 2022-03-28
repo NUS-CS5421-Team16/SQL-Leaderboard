@@ -91,11 +91,13 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
         teams_data = teams_serializer.data
         invalid_teams = []
-        for idx, item in enumerate(teams_data):
-            if 'status' not in item:
+        rank_idx = 1
+        for item in teams_data:
+            if 'status' not in item or item['status'] != "success":
                 invalid_teams.append(item)
             else:
-                json_data[idx+1] = item
+                json_data[rank_idx] = item
+                rank_idx += 1
         if len(invalid_teams) > 0:
             json_data[-1] = invalid_teams
 
