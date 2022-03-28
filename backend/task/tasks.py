@@ -1,13 +1,19 @@
+from celery.schedules import crontab
 from django.db import connections
 
 from backend.celery import app as celery_app
 from competition.models import Competition
+from competitor.models import Team
 
 from task.models import SetupTask, Task, QueryTask
 
 
 @celery_app.on_after_finalize.connect
 def setup_periodic_tasks(sender, **kwargs):
+    sender.add_periodic_task(
+        crontab(hour=0, minute=0),
+        update_remain_upload_times.s()
+    )
     sender.add_periodic_task(5, find_and_run_task.s())
 
 
@@ -17,6 +23,24 @@ def try_run_task(task):
     running_task_count = Task.objects.filter(status=Task.Status.RUNNING).count()
     if running_task_count < concurrent_limit:
         task.run()
+
+
+@celery_app.task
+def check_competition_end_and_create_private_task():
+    pass
+
+
+@celery_app.task
+def update_remain_upload_times():
+    competition_instance = Competition.objects.first()
+    if competition_instance is None:
+        return
+
+    remain_upload_times = competition_instance.upload_limit
+    for team in Team.objects.all():
+        team.remain_upload_times = remain_upload_times
+        team.save()
+    print("update_remain_upload_times")
 
 
 @celery_app.task
