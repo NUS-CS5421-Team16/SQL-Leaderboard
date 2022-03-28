@@ -18,10 +18,11 @@ class PublicTeamSerializer(TeamSerializer):
     start_time = ReadOnlyField(source='best_public_task.start_time')
     end_time = ReadOnlyField(source='best_public_task.end_time')
     running_time = ReadOnlyField(source='best_public_task.result')
+    team_name = ReadOnlyField(source='name')
 
     class Meta:
         model = Team
-        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'name', 'entries']
+        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'team_name', 'entries']
 
 
 class PrivateTeamSerializer(TeamSerializer):
@@ -29,10 +30,11 @@ class PrivateTeamSerializer(TeamSerializer):
     start_time = ReadOnlyField(source='best_private_task.start_time')
     end_time = ReadOnlyField(source='best_private_task.end_time')
     running_time = ReadOnlyField(source='best_private_task.result')
+    team_name = ReadOnlyField(source='name')
 
     class Meta:
         model = Team
-        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'name', 'entries']
+        fields = ['id', 'status', 'start_time', 'end_time', 'running_time', 'team_name', 'entries']
 
 
 class CompetitorSerializer(serializers.ModelSerializer):
