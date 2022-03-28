@@ -1,4 +1,5 @@
 import uuid
+from django.utils import timezone
 
 from django.db.transaction import atomic
 from rest_framework import viewsets, status
@@ -9,9 +10,11 @@ from rest_framework.response import Response
 
 from competition.models import Competition
 from competition.serializer import CompetitionSerializer
-from competitor.serializer import CompetitorSerializer, TeamSerializer
+from competitor.serializer import CompetitorSerializer, PublicTeamSerializer, PrivateTeamSerializer
 from task.models import SetupTask
 from task.serializer import SetupTaskSerializer
+
+from competitor.models import Team
 
 
 class CompetitionViewset(viewsets.ModelViewSet):
@@ -57,9 +60,48 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
-        print(kwargs)
-        print(request.user)
-        return Response(status=status.HTTP_200_OK, data={})
+        try:
+            is_private = bool(int(request.query_params.get('private')))
+            is_desc = bool(int(request.query_params.get('ordering')))
+        except Exception as e:
+            return Response(status=status.HTTP_400_BAD_REQUEST,
+                            data={"message": f"Please Check the URL. ERROR: {str(e)}"})
+        json_data = {}
+        if not is_private:
+            if is_desc:
+                teams = Team.objects.all().order_by('-best_public_task__result', 'entries',
+                                                    'best_public_task__start_time')
+            else:
+                teams = Team.objects.all().order_by('best_public_task__result', 'entries',
+                                                    'best_public_task__start_time')
+            teams_serializer = PublicTeamSerializer(teams, many=True)
+        else:
+            competition_deadline = Competition.objects.first().end_time
+            if competition_deadline > timezone.now():
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": "Cannot check the private leaderboard's results now."})
+
+            if is_desc:
+                teams = Team.objects.all().order_by('-best_private_task__result', 'entries',
+                                                    'best_private_task__start_time')
+            else:
+                teams = Team.objects.all().order_by('best_private_task__result', 'entries',
+                                                    'best_private_task__start_time')
+            teams_serializer = PrivateTeamSerializer(teams, many=True)
+
+        teams_data = teams_serializer.data
+        invalid_teams = []
+        rank_idx = 1
+        for item in teams_data:
+            if 'status' not in item or item['status'] != "success":
+                invalid_teams.append(item)
+            else:
+                json_data[rank_idx] = item
+                rank_idx += 1
+        if len(invalid_teams) > 0:
+            json_data[-1] = invalid_teams
+
+        return Response(status=status.HTTP_200_OK, data=json_data)
 
     def create_setup_task(self, competition_id, request_data):
         # create setup tasks
