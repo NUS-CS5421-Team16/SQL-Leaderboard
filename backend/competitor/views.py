@@ -10,6 +10,7 @@ from competitor.models import Competitor, Team
 from competitor.serializer import CompetitorSerializer
 from task.models import QueryTask
 from task.serializer import QueryTaskSerializer
+from task.tasks import async_run_task
 
 
 @api_view(['POST'])
@@ -148,8 +149,35 @@ class CompetitorViewset(viewsets.ModelViewSet):
 
         # create task
         if request.method == 'POST':
+            # check remain_upload_times
+            competitor_instance = Competitor.objects.get(pk=user_id)
+            remain_upload_times = competitor_instance.team.remain_upload_times
+            if remain_upload_times > 0:
+                competitor_instance.team.remain_upload_times = remain_upload_times - 1
+            else:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "You are not allowed to upload "
+                                                                                     "today, please upload after "
+                                                                                     "12:00am"})
 
-            return Response(status=status.HTTP_200_OK, data={})
+            # check if there are any dangerous operations
+            sql_file = request.FILES.get('sql')
+            sql = sql_file.read().decode()
+            for op in QueryTask.dangerous_ops:
+                if sql.find(op) != -1:
+                    return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Write operation detected! "
+                                                                                         "Only SELECT is allowed"})
+            # create query task
+            serializer = QueryTaskSerializer(data={
+                "sql": sql_file,
+                "query_type": QueryTask.QueryTaskType.PUBLIC,
+                "competitor": user_id
+            })
+            serializer.is_valid(raise_exception=True)
+            querytask = serializer.save()
+
+            # run task
+            async_run_task.apply_async((querytask.id, "querytask"))
+            return Response(status=status.HTTP_201_CREATED, data=serializer.data)
         # retrieve latest task of the team
         elif request.method == 'GET':
             competitor_instance = Competitor.objects.get(pk=user_id)
