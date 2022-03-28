@@ -18,6 +18,7 @@ from task.models import SetupTask
 from task.serializer import SetupTaskSerializer
 
 from competitor.models import Team
+from task.tasks import async_run_task
 
 
 class CompetitionViewset(viewsets.ModelViewSet):
@@ -46,12 +47,14 @@ class CompetitionViewset(viewsets.ModelViewSet):
             create_serailizer = self.get_serializer(data=request.data)
             create_serailizer.is_valid(raise_exception=True)
             competition_instance = create_serailizer.save()
-            self.create_setup_task(competition_instance.id, request_data=request.data)
+            setuptask_id_list = self.create_setup_task(competition_instance.id, request_data=request.data)
 
             competitor_info = request.FILES.get('competitor_info')
             if not competitor_info:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             self.load_competitors(competitor_info, competition_instance)
+
+        self.run_setup_task(setuptask_id_list)
 
         return Response(status=status.HTTP_201_CREATED, data=create_serailizer.data)
 
@@ -65,12 +68,14 @@ class CompetitionViewset(viewsets.ModelViewSet):
             update_serializer = self.get_serializer(competition_instance, data=request.data)
             update_serializer.is_valid(raise_exception=True)
             update_serializer.save()
-            self.create_setup_task(competition_instance.id, request_data=request.data)
+            setuptask_id_list = self.create_setup_task(competition_instance.id, request_data=request.data)
 
             competitor_info = request.FILES.get('competitor_info')
             if not competitor_info:
                 return Response(status=status.HTTP_400_BAD_REQUEST)
             self.load_competitors(competitor_info, competition_instance)
+
+        self.run_setup_task(setuptask_id_list)
 
         return Response(status=status.HTTP_200_OK, data=update_serializer.data)
 
@@ -133,6 +138,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
             return response
 
     def create_setup_task(self, competition_id, request_data):
+        task_id_list = []
         # create setup tasks
         private_create_task_serializer = SetupTaskSerializer(data={
             'sql': request_data.get("private_sql"),
@@ -141,6 +147,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
         })
         private_create_task_serializer.is_valid(raise_exception=True)
         private_create_task = private_create_task_serializer.save()
+        task_id_list.append(private_create_task.id)
 
         private_query_task_serializer = SetupTaskSerializer(data={
             'sql': request_data.get("reference_query"),
@@ -149,7 +156,8 @@ class CompetitionViewset(viewsets.ModelViewSet):
             'competition': competition_id,
         })
         private_query_task_serializer.is_valid(raise_exception=True)
-        private_query_task_serializer.save()
+        private_query_task = private_query_task_serializer.save()
+        task_id_list.append(private_query_task.id)
 
         public_create_task_serializer = SetupTaskSerializer(data={
             'sql': request_data.get("public_sql"),
@@ -158,6 +166,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
         })
         public_create_task_serializer.is_valid(raise_exception=True)
         public_create_task = public_create_task_serializer.save()
+        task_id_list.append(public_create_task.id)
 
         public_query_task_serializer = SetupTaskSerializer(data={
             'sql': request_data.get("reference_query"),
@@ -166,10 +175,14 @@ class CompetitionViewset(viewsets.ModelViewSet):
             'competition': competition_id,
         })
         public_query_task_serializer.is_valid(raise_exception=True)
-        public_query_task_serializer.save()
+        public_query_task = public_query_task_serializer.save()
+        task_id_list.append(public_query_task.id)
 
-        # TODO: run tasks
+        return task_id_list
 
+    def run_setup_task(self, task_id_list):
+        for task_id in task_id_list:
+            async_run_task.apply_async((task_id, "setuptask"))
 
     def load_competitors(self, competitor_info, competition):
         for line in competitor_info:
