@@ -60,7 +60,15 @@
    python manage.py migrate
    ```
 
-5. Start celery before starting the server. Celery beat and celery worker should run in 2 terminals.
+5. Celery prerequisite: install&run redis service and configure redis url in celery.py
+   ```
+   # /backend/backend/celery.py
+   ...
+   app.conf.broker_url = 'redis://localhost:6379/0'
+   ...
+   ```
+
+6. Start celery before starting the server. Celery beat and celery worker should run in 2 terminals.
 
    ```
    # run worker first
@@ -72,7 +80,7 @@
    celery -A backend beat -l info
    ```
 
-6. Start your server.
+7. Start your server.
 
    ```shell
    python manage.py runserver 0.0.0.0:8000
