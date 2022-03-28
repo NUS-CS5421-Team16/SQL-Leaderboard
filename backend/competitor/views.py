@@ -98,6 +98,11 @@ class CompetitorViewset(viewsets.ModelViewSet):
 
     @action(detail=True, methods=['PUT'])
     def team(self, request, *args, **kwargs):
+        # check permission
+        user_id = int(kwargs.get("pk"))
+        if not request.user.is_superuser and request.user.id != user_id:
+            return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "permission denied!"})
+
         # change team detail
         try:
             competitor = Competitor.objects.get(pk=kwargs.get('pk'))
@@ -148,5 +153,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
         # retrieve latest task of the team
         elif request.method == 'GET':
             competitor_instance = Competitor.objects.get(pk=user_id)
-            task_serializer = QueryTaskSerializer(competitor_instance.team.best_private_task)
+            team = competitor_instance.team
+            task = QueryTask.objects.filter(competitor__team=team).order_by("start_time").first()
+            task_serializer = QueryTaskSerializer(task)
             return Response(status=status.HTTP_200_OK, data=task_serializer.data)

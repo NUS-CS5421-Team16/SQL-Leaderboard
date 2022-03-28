@@ -1,7 +1,38 @@
 from django.conf import settings
-from django.db import models
+from django.db import models, connections
+from django.db.utils import DatabaseError
 
 from competitor.models import Competitor, Competition
+
+CAL_TIME_SQL = """
+CREATE OR REPLACE FUNCTION caltime (TEXT) RETURNS TEXT AS
+$$
+DECLARE
+r RECORD;
+p TEXT;
+e TEXT;
+ap NUMERIC := 0;
+ae NUMERIC := 0;
+total NUMERIC := 0;
+BEGIN
+FOR r in EXECUTE 'EXPLAIN ANALYZE ' || $1
+LOOP
+	IF  r::TEXT LIKE '%Planning%'
+	THEN 
+	p := regexp_replace( r::TEXT, '.*Planning (?:T|t)ime: (.*) ms.*', '\1');
+	END IF;
+	IF r::TEXT LIKE '%Execution%'
+	THEN 
+	e := regexp_replace( r::TEXT, '.*Execution (?:T|t)ime: (.*) ms.*', '\1');
+	END IF;
+END LOOP;
+ap := ap + (p::NUMERIC - ap);
+ae := ae + (e::NUMERIC - ae);
+total = ap + ae;
+RETURN ROUND(total, 2);
+END;
+$$ LANGUAGE plpgsql;
+"""
 
 
 def get_task_path(instance, filename):
@@ -25,9 +56,6 @@ class Task(models.Model):
     def check_safety(self):
         pass
 
-    def run(self, **kwargs):
-        pass
-
 
 class SetupTask(Task):
     class SetupTaskType(models.TextChoices):
@@ -43,8 +71,10 @@ class SetupTask(Task):
         return f"tasks/{self.__class__.__name__}/{self.setup_type}.sql"
 
     def run(self):
+        sql = ""
         if "create" in self.setup_type:
             save_result = False
+            sql += CAL_TIME_SQL
         else:
             save_result = True
 
@@ -53,7 +83,28 @@ class SetupTask(Task):
         else:
             database = settings.PUBLIC_DATABASE
 
-        super(SetupTask, self).run(save_result=save_result, database=database)
+        self.status = Task.Status.RUNNING
+        self.save()
+
+        with self.sql.open('r') as file:
+            sql += file.read()
+
+        try:
+            with connections[database].cursor() as cursor:
+                cursor.execute(sql)
+                if save_result:
+                    rows = cursor.fetchall()
+                    setattr(self.competition, f"{database}_result", str(rows))
+                    self.competition.save()
+
+            self.status = Task.Status.SUCCESS
+            self.save()
+        except DatabaseError as e:
+            setattr(self.competition, f"{database}_result", str(e))
+            self.competition.save()
+            self.status = Task.Status.ERROR
+            self.save()
+            print(e)
 
 
 class QueryTask(Task):
