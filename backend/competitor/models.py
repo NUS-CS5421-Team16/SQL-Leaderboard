@@ -15,4 +15,4 @@ class Team(models.Model):
 
 class Competitor(User):
     competition = models.ForeignKey(Competition, on_delete=models.CASCADE)
-    team = models.ForeignKey(Team, on_delete=models.CASCADE)
+    team = models.ForeignKey(Team, on_delete=models.SET_NULL, null=True)
