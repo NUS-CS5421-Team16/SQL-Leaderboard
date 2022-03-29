@@ -190,6 +190,6 @@ class CompetitorViewset(viewsets.ModelViewSet):
         elif request.method == 'GET':
             competitor_instance = Competitor.objects.get(pk=user_id)
             team = competitor_instance.team
-            task = QueryTask.objects.filter(competitor__team=team).order_by("start_time").first()
+            task = QueryTask.objects.filter(competitor__team=team).order_by("-start_time").first()
             task_serializer = QueryTaskSerializer(task)
             return Response(status=status.HTTP_200_OK, data=task_serializer.data)

@@ -1,11 +1,13 @@
 from celery.schedules import crontab
 from django.db.transaction import atomic
+from django.utils import timezone
 
 from backend.celery import app as celery_app
 from competition.models import Competition
 from competitor.models import Team
 
 from task.models import SetupTask, Task, QueryTask
+from task.serializer import QueryTaskSerializer
 
 
 @celery_app.on_after_finalize.connect
@@ -15,6 +17,10 @@ def setup_periodic_tasks(sender, **kwargs):
         update_remain_upload_times.s()
     )
     sender.add_periodic_task(5, find_and_run_task.s())
+    sender.add_periodic_task(
+        crontab(hour='*/2', minute=1), # check ddl every 2 hour
+        check_competition_end_and_create_private_task.s()
+    )
 
 
 def try_run_task(task):
@@ -33,9 +39,31 @@ def try_run_task(task):
         task.run()
 
 
-@celery_app.task
+# @celery_app.task
 def check_competition_end_and_create_private_task():
-    pass
+    competition_instance = Competition.objects.first()
+    if competition_instance.end_time > timezone.now():
+        print("check_competition_end_and_create_private_task---competition is going on")
+        return
+    private_task = QueryTask.objects.filter(query_type=QueryTask.QueryTaskType.PRIVATE).first()
+    if private_task is not None:
+        print("check_competition_end_and_create_private_task---private query already created")
+        return
+    print("check_competition_end_and_create_private_task---create private query")
+    for team in Team.objects.all():
+        competitor_instance = team.competitor_set.first()
+        if competitor_instance is None:
+            continue
+        latest_public_task = QueryTask.objects.filter(competitor__team=team).order_by("-start_time").first()
+
+        if latest_public_task:
+            serializer = QueryTaskSerializer(data={
+                "sql": latest_public_task.sql,
+                "query_type": QueryTask.QueryTaskType.PRIVATE,
+                "competitor": competitor_instance.id
+            })
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
 
 
 @celery_app.task
