@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from competitor.models import Competitor, Team
+from competitor.models import Competitor, Team, Competition
 from competitor.serializer import CompetitorSerializer
 from task.models import QueryTask
 from task.serializer import QueryTaskSerializer
@@ -116,6 +116,17 @@ class CompetitorViewset(viewsets.ModelViewSet):
                 Team.objects.filter(uuid=target_team_uuid).update(name=request.data['team_name'])
                 # print("[Update Team Name] ", target_team.name, " -> ", request.data['team_name'])
             elif current_team_uuid != target_team_uuid and target_team.name == request.data['team_name']:
+                is_desc = Competition.objects.first().descendent_ordering
+                if current_team.best_public_task is not None:
+                    if target_team.best_public_task is None:
+                        target_team.best_public_task = current_team.best_public_task
+                    elif is_desc and target_team.best_public_task.result < current_team.best_public_task.result:
+                        target_team.best_public_task = current_team.best_public_task
+                    elif not is_desc and target_team.best_public_task.result > current_team.best_public_task.result:
+                        target_team.best_public_task = current_team.best_public_task
+                target_team.remain_upload_times = max(target_team.remain_upload_times, current_team.remain_upload_times)
+                target_team.entries = target_team.entries + current_team.entries
+                target_team.save()
                 competitor.team = target_team
                 competitor.save()
                 current_team.delete()

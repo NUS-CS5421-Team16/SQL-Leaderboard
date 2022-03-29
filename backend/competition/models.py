@@ -30,6 +30,7 @@ class Competition(models.Model):
     reference_query = models.FileField(upload_to=get_reference_query_path, blank=False, null=False)
     private_result = models.TextField(null=True)
     public_result = models.TextField(null=True)
+    descendent_ordering = models.BooleanField(blank=False, null=False)
 
 
 

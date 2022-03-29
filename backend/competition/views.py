@@ -83,10 +83,10 @@ class CompetitionViewset(viewsets.ModelViewSet):
     def rank(self, request, *args, **kwargs):
         try:
             is_private = bool(int(request.query_params.get('private')))
-            is_desc = bool(int(request.query_params.get('ordering')))
         except Exception as e:
             return Response(status=status.HTTP_400_BAD_REQUEST,
                             data={"message": f"Please Check the URL. ERROR: {str(e)}"})
+        is_desc = Competition.objects.first().descendent_ordering
         json_data = {}
         if not is_private:
             if is_desc:
