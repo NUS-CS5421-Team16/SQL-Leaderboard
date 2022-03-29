@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, action
@@ -158,6 +159,11 @@ class CompetitorViewset(viewsets.ModelViewSet):
                 return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "You are not allowed to upload "
                                                                                      "today, please upload after "
                                                                                      "12:00am"})
+            # check ddl
+            competition_deadline = competitor_instance.competition.end_time
+            if competition_deadline < timezone.now():
+                return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Competition ended! You are not "
+                                                                                     "allowed to upload sql any more!"})
 
             # check if there are any dangerous operations
             sql_file = request.FILES.get('sql')
