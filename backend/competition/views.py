@@ -193,6 +193,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
                 "uuid": str(uuid.uuid5(uuid.NAMESPACE_DNS, email)),
                 "name": username,
                 "remain_upload_times": competition.upload_limit,
+                "entries": 0,
             }
             team_serializer = TeamSerializer(data=team_data)
             team_serializer.is_valid(raise_exception=True)

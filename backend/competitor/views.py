@@ -162,6 +162,8 @@ class CompetitorViewset(viewsets.ModelViewSet):
             remain_upload_times = competitor_instance.team.remain_upload_times
             if remain_upload_times > 0:
                 competitor_instance.team.remain_upload_times = remain_upload_times - 1
+                competitor_instance.team.entries += 1
+                competitor_instance.team.save()
             else:
                 return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "You are not allowed to upload "
                                                                                      "today, please upload after "
