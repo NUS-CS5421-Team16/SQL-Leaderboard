@@ -42,6 +42,9 @@ def try_run_task(task):
 @celery_app.task
 def check_competition_end_and_create_private_task():
     competition_instance = Competition.objects.first()
+    if competition_instance is None:
+        print("check_competition_end_and_create_private_task---competition not created")
+        return
     if competition_instance.end_time > timezone.now():
         print("check_competition_end_and_create_private_task---competition is going on")
         return
