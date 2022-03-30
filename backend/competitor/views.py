@@ -210,7 +210,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
             if task_instance.competitor.team.id == competitor_instance.team.id:
                 with task_instance.sql.open('r') as file:
                     response = HttpResponse(file, content_type='application/msword')
-                    response['Content-Disposition'] = 'attachment; filename=public.sql'
+                    response['Content-Disposition'] = f'attachment; filename={task_instance.id}.sql'
                     return response
             else:
                 return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "Permission denied!"})

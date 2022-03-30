@@ -152,7 +152,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
         # get an open file handle (I'm just using a file attached to the model for this example):
         with instance.reference_query.open('r') as file:
             response = HttpResponse(file, content_type='application/msword')
-            response['Content-Disposition'] = 'attachment; filename=public.sql'
+            response['Content-Disposition'] = 'attachment; filename=reference.sql'
             return response
 
     def create_setup_task(self, competition_id, request_data):
