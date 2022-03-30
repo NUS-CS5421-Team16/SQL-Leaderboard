@@ -7,5 +7,5 @@ from competition.models import Competition
 class CompetitionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Competition
-        fields = '__all__'
+        exclude = ['private_result', 'public_result']
 

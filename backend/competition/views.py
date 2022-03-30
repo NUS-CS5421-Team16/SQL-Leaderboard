@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from rest_framework import viewsets, status
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import action
-from rest_framework.permissions import IsAdminUser, IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, BasePermission, SAFE_METHODS
 from rest_framework.response import Response
 
 from competition.models import Competition
@@ -21,10 +21,15 @@ from competitor.models import Team
 from task.tasks import async_run_task
 
 
+class ReadOnly(BasePermission):
+    def has_permission(self, request, view):
+        return request.method in SAFE_METHODS
+
+
 class CompetitionViewset(viewsets.ModelViewSet):
     queryset = Competition.objects.all()
     serializer_class = CompetitionSerializer
-    permission_classes = [IsAdminUser]
+    permission_classes = [IsAdminUser|ReadOnly]
 
     def list(self, request, *args, **kwargs):
         instance = Competition.objects.all().first()
@@ -124,7 +129,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
         return Response(status=status.HTTP_200_OK, data=json_data)
 
-    @action(methods=['get'], detail=False)
+    @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated])
     def download_public(self, *args, **kwargs):
         competitions = Competition.objects.all()
         if not competitions.exists():
@@ -132,9 +137,22 @@ class CompetitionViewset(viewsets.ModelViewSet):
         instance = competitions.first()
 
         # get an open file handle (I'm just using a file attached to the model for this example):
-        with instance.private_sql.open('r') as file:
+        with instance.public_sql.open('r') as file:
             response = HttpResponse(file, content_type='application/msword')
             response['Content-Disposition'] = 'attachment; filename=public.sql'
+            return response
+
+    @action(methods=['get'], detail=False, permission_classes=[IsAuthenticated])
+    def download_reference(self, *args, **kwargs):
+        competitions = Competition.objects.all()
+        if not competitions.exists():
+            return Response(status=status.HTTP_404_NOT_FOUND, data={"message": "competition not found!"})
+        instance = competitions.first()
+
+        # get an open file handle (I'm just using a file attached to the model for this example):
+        with instance.reference_query.open('r') as file:
+            response = HttpResponse(file, content_type='application/msword')
+            response['Content-Disposition'] = 'attachment; filename=reference.sql'
             return response
 
     def create_setup_task(self, competition_id, request_data):

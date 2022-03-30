@@ -1,5 +1,6 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.authtoken.models import Token
@@ -199,8 +200,17 @@ class CompetitorViewset(viewsets.ModelViewSet):
             return Response(status=status.HTTP_201_CREATED, data=serializer.data)
         # retrieve latest task of the team
         elif request.method == 'GET':
+            try:
+                task_id = int(request.query_params.get("tid"))
+                task_instance = QueryTask.objects.get(pk=task_id)
+            except Exception as e:
+                return Response(status=status.HTTP_400_BAD_REQUEST,
+                                data={"message": f"Please Check the tid. ERROR: {str(e)}"})
             competitor_instance = Competitor.objects.get(pk=user_id)
-            team = competitor_instance.team
-            task = QueryTask.objects.filter(competitor__team=team).order_by("-start_time").first()
-            task_serializer = QueryTaskSerializer(task)
-            return Response(status=status.HTTP_200_OK, data=task_serializer.data)
+            if task_instance.competitor.team.id == competitor_instance.team.id:
+                with task_instance.sql.open('r') as file:
+                    response = HttpResponse(file, content_type='application/msword')
+                    response['Content-Disposition'] = f'attachment; filename={task_instance.id}.sql'
+                    return response
+            else:
+                return Response(status=status.HTTP_401_UNAUTHORIZED, data={"message": "Permission denied!"})
