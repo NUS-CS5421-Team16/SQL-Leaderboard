@@ -99,6 +99,15 @@ class CompetitorViewset(viewsets.ModelViewSet):
         }
         return Response(status=status.HTTP_200_OK, data=result_data)
 
+    def create(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+    def update(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
+    def destroy(self, request, *args, **kwargs):
+        return Response(status=status.HTTP_403_FORBIDDEN)
+
     @action(detail=True, methods=['PUT'])
     def team(self, request, *args, **kwargs):
         # check permission
