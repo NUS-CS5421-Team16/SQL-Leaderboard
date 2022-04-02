@@ -1,0 +1,21 @@
+@import "./mixin.scss";
+
+.theme-all{
+    @include font-color($color-ming);
+    // @include font-size($size-ming);
+    @include bg-color($bg-ming);
+}
+.theme-size{
+    @include font-size($size-ming);
+}
+.theme-color{
+    @include font-color($color-ming);
+}
+.theme-bg{
+    @include bg-color($bg-ming);
+    // .is-active{
+    //     color: unset !important;
+    // }
+    // .el-menu-item.is-active i
+   
+}

@@ -3,3 +3,5 @@
 backend/Pipfile
 backend/upload
 .idea
+.DS_Store
+node_modules
