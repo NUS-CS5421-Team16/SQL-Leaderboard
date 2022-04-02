@@ -85,6 +85,15 @@
    ```shell
    python manage.py runserver 0.0.0.0:8000
    ```
+   
+### Frontend
+
+To combine frontend and backend and run them together, there are some additional steps:
+
+1. Install `npm` and `node`
+2. `cd frontend`
+3. Run build: `npm run build`. Then you will see `static/` in `backend/template`
+4. Then start django as described above.
 
 ## Reference Website (Internal Review)
 
