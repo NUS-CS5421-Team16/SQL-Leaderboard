@@ -14,7 +14,7 @@ from competition.serializer import CompetitionSerializer
 from competitor.models import Team, Competitor
 from competitor.serializer import CompetitorSerializer, TeamSerializer, PublicTeamSerializer, PrivateTeamSerializer
 
-from task.models import SetupTask
+from task.models import SetupTask, Task
 from task.serializer import SetupTaskSerializer
 
 from competitor.models import Team
@@ -83,6 +83,13 @@ class CompetitionViewset(viewsets.ModelViewSet):
         self.run_setup_task(setuptask_id_list)
 
         return Response(status=status.HTTP_200_OK, data=update_serializer.data)
+
+    def destroy(self, request, *args, **kwargs):
+        competition_id = kwargs.get('pk')
+        competition_instance = Competition.objects.get(pk=competition_id)
+        with atomic():
+            self.clear_competition(competition_instance)
+        return super(CompetitionViewset, self).destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
@@ -239,5 +246,9 @@ class CompetitionViewset(viewsets.ModelViewSet):
 
         # delete teams and competitors
         Team.objects.all().delete()
-        competitors = Competitor.objects.all().delete()
+        Competitor.objects.all().delete()
 
+        # delete setup tasks
+        for task in Task.objects.all():
+            task.sql.delete(False)
+            task.delete()
