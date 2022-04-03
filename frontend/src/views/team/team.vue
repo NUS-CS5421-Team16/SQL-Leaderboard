@@ -16,18 +16,23 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive, onMounted } from 'vue';
+import { ref, reactive, onMounted, computed } from 'vue';
+import { useStore } from "vuex";
 import { getCompetitor, updateTeam } from '@/api'
 import { ElMessage } from 'element-plus'
 
-const cid = ref('12312312')
+const store = useStore();
+const state = reactive({
+    cid: computed(() => store.getters.getCid),
+})
+
 const form = reactive({
     name: '',
     id: '',
 })
 
 const onSubmit = async () => {
-    const res = await updateTeam(cid.value, form)
+    const res = await updateTeam(state.cid, form)
     if (res) {
         ElMessage.success('update Success')
     }
@@ -35,12 +40,13 @@ const onSubmit = async () => {
 }
 
 const getDetail = async () => {
-    const res = await getCompetitor(cid.value);
+    const res = await getCompetitor(state.cid);
     form.name = (res as any).name;
     form.id = (res as any).id;
 }
 
 onMounted(() => {
+    // store.commit("setCid", '12212121');
     getDetail();
 })
 </script>

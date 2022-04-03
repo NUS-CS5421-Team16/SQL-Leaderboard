@@ -37,13 +37,13 @@ module.exports = {
         open:true,
         proxy: {
             '/api': {
-                target: 'http://localhost:8888',
+                target: 'http://localhost:8000',
                 changeOrigin: true,
                 ws: true,
                 pathRewrite: {
                     '^/api': ''
                 }
-            }
+            },
         }
     },
     publicPath: '',
