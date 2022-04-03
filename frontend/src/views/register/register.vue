@@ -68,8 +68,10 @@ export default defineComponent({
                 })
                 return
             }
-            //registerApi(this.email, this.username, this.password).then(()=>{})
-            this.$router.push({path: "/login"})
+            registerApi(this.email, this.username, this.password).then((res:any)=>{
+                console.log(res.data)
+            })
+            //this.$router.push({path: "/login"})
         },
         checkParameter() {
             let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;

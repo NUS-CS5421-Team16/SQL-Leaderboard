@@ -9,11 +9,12 @@
             <el-form-item label="Description">
                 <el-input v-model="form.description" type="textarea" :rows="3"/>
             </el-form-item>
-            <el-form-item label="Competition">
+            <el-form-item label="Deadline">
                 <el-date-picker
                     v-model="deadline"
                     type="datetime"
                     placeholder="Select date and time"
+                    value-format="YYYY-MM-DDThh:mm:ss Z"
                 />
             </el-form-item>
             <el-form-item label="Upload limit">
@@ -45,14 +46,7 @@
                         content="referenced query to get the expected result"
                         placement="top-start">
                 <el-form-item label="Reference Query">
-                    <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :limit="1"
-                        :on-change="handleUploadChange"
-                    >
-                        <el-button type="primary">Click to upload</el-button>
-                    </el-upload>
+                    <input  type="file" @change="getFile('reference_query')" id="reference_query" accept=".sql"/>
                 </el-form-item>
             </el-tooltip>
             <el-tooltip class="box-item"
@@ -60,14 +54,7 @@
                         content=".txt file with all the competitors' emails, separated with semicolon"
                         placement="top-start">
                 <el-form-item label="Competitors">
-                    <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :limit="1"
-                        :on-change="handleUploadChange1"
-                    >
-                        <el-button type="primary">Click to upload</el-button>
-                    </el-upload>
+                    <input  type="file" @change="getFile('competitor_info')" id="competitor_info" accept=".txt"/>
                 </el-form-item>
             </el-tooltip>
             <el-tooltip class="box-item"
@@ -75,14 +62,7 @@
                         content=".sql file to insert data into public database"
                         placement="top-start">
                 <el-form-item label="Public dataset">
-                    <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :limit="1"
-                        :on-change="handleUploadChange2"
-                    >
-                        <el-button type="primary">Click to upload</el-button>
-                    </el-upload>
+                    <input  type="file" @change="getFile('public_sql')" id="public_sql" accept=".sql"/>
                 </el-form-item>
             </el-tooltip>
             <el-tooltip class="box-item"
@@ -90,14 +70,7 @@
                         content=".sql file to insert data into private database"
                         placement="top-start">
                 <el-form-item label="Private dataset">
-                    <el-upload
-                        class="upload-demo"
-                        action="https://jsonplaceholder.typicode.com/posts/"
-                        :limit="1"
-                        :on-change="handleUploadChange3"
-                    >
-                        <el-button type="primary">Click to upload</el-button>
-                    </el-upload>
+                    <input  type="file" @change="getFile('private_sql')" id="private_sql" accept=".sql"/>
                 </el-form-item>
             </el-tooltip>
         </el-form>
@@ -113,6 +86,7 @@ import {reactive, ref} from 'vue'
 import type { UploadUserFile, UploadProps,UploadInstance } from 'element-plus/lib/el-upload/src'
 import {ElMessage, ElMessageBox} from "element-plus";
 import {postCompetitionApi} from "@/api/competition";
+import store from "@/store";
 const deadline = ref('')
 // do not use same name with ref
 const descendent = ref(true)
@@ -122,93 +96,60 @@ const form = reactive({
     description: '',
     upload_limit:'',
     concurrent_limit: 1,
-    running_time_limit:''
+    running_time_limit:'',
 })
+
+const formData = new FormData()
+
+const getFile = (target) => {
+    switch (target) {
+        case "reference_query":
+            data.append("reference_query", document.getElementById("reference_query").files[0])
+            break
+        case "competitor_info":
+            data.append("competitor_info", document.getElementById("competitor_info").files[0])
+            break
+        case "public_sql":
+            data.append("public_sql", document.getElementById("public_sql").files[0])
+            break
+        case "private_sql":
+            data.append("private_sql", document.getElementById("private_sql").files[0])
+            break
+        default:
+            break
+    }
+}
 
 const onSubmit = () => {
     console.log('submit!')
-    console.log(form.name)
-    console.log(form.description)
-    console.log(form.upload_limit)
-    console.log(form.concurrent_limit)
-    console.log(form.running_time_limit)
     console.log(deadline.value)
-    console.log(descendent.value)
-    console.log(reader)
-    console.log(reader1)
-    console.log(reader2)
-    console.log(reader3)
-    postCompetitionApi(form.name, form.description, form.upload_limit, form.concurrent_limit,
-        form.running_time_limit, deadline.value, descendent.value, reader.result, reader1.result, reader2.result, reader3.result).then(() => {})
+
+    data.append("name", form.name)
+    data.append("description", form.description)
+    data.append("upload_limit", form.upload_limit)
+    data.append("concurrent_limit", form.concurrent_limit.toString())
+    data.append("running_time_limit", form.running_time_limit)
+    data.append("end_time", deadline.value)
+    if (descendent.value) {
+        data.append("descendent_ordering", "true")
+    } else {
+        data.append("descendent_ordering", "false")
+    }
+    postCompetitionApi(data).then((res) => {})
+    /*postCompetitionApi(form.name, form.description, form.upload_limit, form.concurrent_limit,
+        form.running_time_limit, deadline.value, descendent.value, files).then(() => {})*/
 }
 
-const reader = new FileReader()
-const reader1 = new FileReader();
-const reader2 = new FileReader();
-const reader3 = new FileReader();
-
-const competitorsFileList = []
-
-
-
-const beforeUpload = (file) => {
-    const fileType = file.name.substring(file.name.lastIndexOf('.'))
-}
+const data = new FormData()
 
 const uploadHttpRequest = (data) => {
     let reader = new FileReader()
     let that = this
     reader.readAsText(data.file)
+
     /*reader.onload = function() {
         that.formData.mmiapXml = this.result
     }*/
-}
-
-const handleUploadChange = (file) => {
-    console.log(typeof file)
-    console.log(file)
-    reader.readAsBinaryString(file.raw)
-}
-
-const handleUploadChange1 = (file) => {
-    console.log(typeof file)
-    console.log(file)
-    reader1.readAsBinaryString(file.raw)
-}
-
-const handleUploadChange2 = (file) => {
-    console.log(file)
-    reader2.readAsBinaryString(file.raw)
-}
-
-const handleUploadChange3 = (file) => {
-    console.log(file)
-    reader3.readAsBinaryString(file.raw)
-}
-
-const handleRemove: UploadProps['onRemove'] = (file, uploadFiles) => {
-    console.log(file, uploadFiles)
-}
-
-const handlePreview: UploadProps['onPreview'] = (uploadFile) => {
-    console.log(uploadFile)
-}
-
-const handleExceed: UploadProps['onExceed'] = (files, uploadFiles) => {
-    ElMessage.warning(
-        `The limit is 1, you selected ${files.length} files this time, add up to ${
-            files.length + uploadFiles.length
-        } totally`
-    )
-}
-
-const beforeRemove: UploadProps['beforeRemove'] = (uploadFile, uploadFiles) => {
-    return ElMessageBox.confirm(
-        `Cancel the transfert of ${uploadFile.name} ?`
-    ).then(
-        () => true,
-        () => false
-    )
 }
 </script>
 
