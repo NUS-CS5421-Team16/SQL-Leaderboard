@@ -2,7 +2,7 @@
     <div style="padding: 20px;">
         <div class="operation">
             <el-button class="search-btn" type="primary" @click="getRankList">Refresh</el-button>
-            <upload :rawId="rawId" @uploadSuccess="handleClick"></upload>
+            <upload @uploadSuccess="handleClick"></upload>
         </div>
 
         <el-tabs v-model="tabChoose" class="demo-tabs" @tab-click="handleClick">
@@ -82,7 +82,6 @@ const state = reactive({
 
 const tableData = ref([]);
 const loading = ref(false);
-const rawId = ref('idddd');
 const tabChoose = ref('first');
 
 const handleClick = () => {

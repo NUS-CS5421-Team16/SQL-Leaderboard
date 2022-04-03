@@ -24,10 +24,6 @@ import { useStore } from "vuex";
 import { ElMessageBox } from 'element-plus'
 import { config } from '@/utils/config'
 
-const props = defineProps({
-    rawId: { type: String, default: '' },
-})
-
 const emit = defineEmit(['uploadSuccess'])
 
 const uploadRef = ref()
