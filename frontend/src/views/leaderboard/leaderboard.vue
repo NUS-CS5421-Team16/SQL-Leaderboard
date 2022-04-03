@@ -97,7 +97,6 @@ const getRankList = async () => {
     loading.value = true;
     const params = {
         private: 1,
-        ordering: 1,
     }
     const res = await getCompetitionRank(params);
     tableData.value = formatData(res) || [];
@@ -173,7 +172,6 @@ const showMsg = (msg: string) => {
 
 // dom ready
 onMounted(async () => {
-    store.commit('setCid', '123123');
     getRankList();
 })
 </script>
