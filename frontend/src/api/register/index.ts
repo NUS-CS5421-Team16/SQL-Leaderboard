@@ -6,7 +6,7 @@ export const registerApi=(email:any, username:any, password:any)=>{
         data: {
             email: email,
             name: username,
-            register: password
+            password: password
         }
     })
 }

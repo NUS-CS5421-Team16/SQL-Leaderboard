@@ -37,22 +37,21 @@ axiosNew.interceptors.request.use(
 axiosNew.interceptors.response.use(response => {
         try{
             let token = response.data.token;
+            // store info from login response
             if(token != null){
-                //store.dispatch('tokenChange',token);
-                //store.state.token = token
                 store.commit('setToken', token)
-            }
-            if (response.data.cid != null) {
-                store.commit('setCid', response.data.cid)
-            }
-            if (response.data.email != null) {
-                store.commit('setEmail', response.data.email)
-            }
-            if (response.data.name != null) {
-                store.commit('setName', response.data.name)
-            }
-            if (response.data.role != null) {
-                store.commit('setRole', response.data.role)
+                if (response.data.id != null) {
+                    store.commit('setCid', response.data.id)
+                }
+                if (response.data.email != null) {
+                    store.commit('setEmail', response.data.email)
+                }
+                if (response.data.name != null) {
+                    store.commit('setName', response.data.name)
+                }
+                if (response.data.role != null) {
+                    store.commit('setRole', response.data.role)
+                }
             }
         }catch(err){
             console.log("Don't need to get token for this response",err)

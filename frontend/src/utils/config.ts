@@ -1,4 +1,4 @@
 export const config= {
-    host:"http://0.0.0.0:8000"
+    host:"http://localhost:8888"
     // host:"http://jsonplaceholder.typicode.com"
 }
