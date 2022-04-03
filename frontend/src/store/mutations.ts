@@ -13,6 +13,21 @@ const mutations={
     },
     setCrumbList(state:any, list:Array<any>) {
         state.crumbList = list
-    }
+    },
+    setToken(state:any, token:any) {
+        state.token = token
+    },
+    setCid(state:any, cid:any) {
+        state.cid = cid
+    },
+    setRole(state:any, role:any) {
+        state.role = role
+    },
+    setName(state:any, name:any) {
+        state.name = name
+    },
+    setEmail(state:any, email:any) {
+        state.email = email
+    },
 }
 export default mutations

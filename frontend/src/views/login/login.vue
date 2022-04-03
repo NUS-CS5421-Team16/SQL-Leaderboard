@@ -76,9 +76,22 @@ export default defineComponent({
                 })
                 return
             }
-            loginApi2(this.username, this.password).then(() => {
+            loginApi2(this.username, this.password).then((res:any) => {
                 console.log("in")
-                //this.$router.push({path: "/competition-admin"})
+                console.log(res.id)
+                console.log(res.role)
+                console.log(res.name)
+                console.log(res.email)
+                if (res.id != -1) {
+                    this.$router.push({path: "/competition-admin"})
+                } else {
+                    ElNotification({
+                        title: 'Error',
+                        message: 'Please create an account',
+                        type: 'error',
+                        duration: 1500
+                    })
+                }
             })
         },
         checkParameter() {
