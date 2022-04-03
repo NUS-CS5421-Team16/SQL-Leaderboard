@@ -4,7 +4,7 @@ import axios from "@/utils/request";
 export const updateTeam = (cid: string, data: any) => {
   return axios({
     method: "PUT",
-    path: `/competitor/${cid}/team`,
+    path: `/competitor/${cid}/team/`,
     data,
   });
 };
@@ -13,7 +13,7 @@ export const updateTeam = (cid: string, data: any) => {
 export const getCompetitor = (cid: string) => {
   return axios({
     method: "GET",
-    path: `/competitor/${cid}`,
+    path: `/competitor/${cid}/`,
   });
 };
 
