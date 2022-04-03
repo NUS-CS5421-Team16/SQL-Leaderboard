@@ -19,19 +19,21 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps, defineEmit } from 'vue';
+import { ref, defineProps, defineEmit, reactive, computed } from 'vue';
+import { useStore } from "vuex";
 import { ElMessageBox } from 'element-plus'
 import { config } from '@/utils/config'
-
-const props = defineProps({
-    rawId: { type: String, default: '' },
-})
 
 const emit = defineEmit(['uploadSuccess'])
 
 const uploadRef = ref()
-const cid = 123123
-const actionUrl = ref(`${config.host}/competitor/${cid}/task`);
+
+const store = useStore();
+const state = reactive({
+    cid: computed(() => store.getters.getCid),
+})
+
+const actionUrl = ref(`${config.host}/competitor/${state.cid}/task/`);
 
 const submitUpload = async () => {
     uploadRef.value!.submit()

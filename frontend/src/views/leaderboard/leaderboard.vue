@@ -2,12 +2,17 @@
     <div style="padding: 20px;">
         <div class="operation">
             <el-button class="search-btn" type="primary" @click="getRankList">Refresh</el-button>
-            <upload :rawId="rawId" @uploadSuccess="handleClick"></upload>
+            <upload @uploadSuccess="handleClick"></upload>
         </div>
 
         <el-tabs v-model="tabChoose" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane label="Leaderboard" name="first">
-                <vxe-table :data="tableData" v-loading="loading">
+                <vxe-table
+                    :data="tableData"
+                    v-loading="loading"
+                    empty-text="No data"
+                    v-if="tabChoose === 'first'"
+                >
                     <vxe-table-column field="index" title="#"></vxe-table-column>
                     <vxe-table-column field="team_name" title="Team Name"></vxe-table-column>
                     <vxe-table-column field="entries" title="Entries"></vxe-table-column>
@@ -24,14 +29,23 @@
                 </vxe-table>
             </el-tab-pane>
             <el-tab-pane label="Current User Result" name="second">
-                <vxe-table :data="tableData" v-loading="loading">
+                <vxe-table
+                    :data="tableData"
+                    v-loading="loading"
+                    empty-text="No data"
+                    v-if="tabChoose === 'second'"
+                >
                     <vxe-table-column field="index" title="#"></vxe-table-column>
                     <vxe-table-column field="team_name" title="Team"></vxe-table-column>
                     <vxe-table-column field="competitor_name" title="Competitor Name"></vxe-table-column>
                     <vxe-table-column field="status" title="Status"></vxe-table-column>
                     <vxe-table-column field="error_message" title="Error Msg">
                         <template #default="scope">
-                            <span v-if="scope.row.error_message"></span>
+                            <span
+                                v-if="scope.row.error_message"
+                                class="msg-overhide"
+                                @click="showMsg(scope.row.error_message)"
+                            >{{ scope.row.error_message }}</span>
                         </template>
                     </vxe-table-column>
                     <vxe-table-column field="start_time" title="Upload Time"></vxe-table-column>
@@ -55,13 +69,19 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, reactive, computed } from 'vue';
+import { useStore } from "vuex";
 import { getCompetitionRank, getCompetitor } from '@/api';
+import { ElMessage, ElMessageBox } from 'element-plus'
 import upload from './components/upload.vue'
+
+const store = useStore();
+const state = reactive({
+    cid: computed(() => store.getters.getCid),
+})
 
 const tableData = ref([]);
 const loading = ref(false);
-const rawId = ref('idddd');
 const tabChoose = ref('first');
 
 const handleClick = () => {
@@ -76,10 +96,9 @@ const getRankList = async () => {
     loading.value = true;
     const params = {
         private: 1,
-        ordering: 1,
     }
     const res = await getCompetitionRank(params);
-    tableData.value = formatData(res);
+    tableData.value = formatData(res) || [];
     // set loading
     setTimeout(() => {
         loading.value = false;
@@ -87,10 +106,9 @@ const getRankList = async () => {
 }
 
 const getCompetitorTask = async () => {
-    const cid = '12312'
-    const res = await getCompetitor(cid);
+    const res = await getCompetitor(state.cid);
 
-    const tasks = (res as any).tasks;
+    const tasks = (res as any).tasks || [];
 
     const len = tasks.length;
     // set order for tasks
@@ -141,10 +159,14 @@ const formatData = (res: any): any => {
 }
 
 const download = (index: number, row: any) => {
-    console.log(index, row);
-    const cid = '12312'
-    window.open(`http://localhost:3000/competition/${cid}/task?tid=${row.id}`)
-    // window.open(`/competition/${cid}/task?tid=${row.id}`)
+    // window.open(`http://localhost:3000/competition/${state.cid}/task?tid=${row.id}`)
+    window.open(`/competition/${state.cid}/task/?tid=${row.id}`)
+}
+
+const showMsg = (msg: string) => {
+    ElMessageBox.alert(msg, 'Error msg', {
+        confirmButtonText: 'OK',
+    })
 }
 
 // dom ready
@@ -161,5 +183,13 @@ onMounted(async () => {
     .search-btn {
         margin-right: 10px;
     }
+}
+.msg-overhide {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    // width: 150px;
+    display: inline-block;
 }
 </style>
