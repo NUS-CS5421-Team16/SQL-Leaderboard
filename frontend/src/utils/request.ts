@@ -4,6 +4,7 @@ import {config} from '@/utils/config'
 import store from "@/store";
 import router from "@/router";
 axiosNew.defaults.timeout =30000;
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 axiosNew.interceptors.request.use(
     config => {
@@ -35,7 +36,7 @@ axiosNew.interceptors.request.use(
 
 axiosNew.interceptors.response.use(response => {
         try{
-            let token = response.data.token;
+            let token = response?.data?.token;
             // store info from login response
             if(token != null){
                 sessionStorage.setItem('token', token)
@@ -84,7 +85,15 @@ const axios=function({path,method="GET",data={}}:any={}){
             ...datas
         }).then(res=>{
             resolve(res.data)
-        }).catch(err=>{resolve(-1)})
+        }).catch(err=>{
+            if(err.response.status === 400) {
+                const msg = err.response.data.message;
+                ElMessageBox.alert(msg, 'Error msg', {
+                    confirmButtonText: 'OK',
+                })
+            }
+            resolve(-1)
+        })
     })
 };
 export default axios
