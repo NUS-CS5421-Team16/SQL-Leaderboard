@@ -29,6 +29,7 @@
                 </vxe-table>
             </el-tab-pane>
             <el-tab-pane label="Leaderboard-Private" name="second">
+            <!-- <el-tab-pane label="Leaderboard Private" name="second" v-if="isCompetiionEnd"> -->
             <vxe-table
                 :data="privateTableData"
                 v-loading="loading"
@@ -94,8 +95,10 @@
 import { ref, onMounted, reactive, computed } from 'vue';
 import { useStore } from "vuex";
 import { getCompetitionRank, getCompetitor } from '@/api';
+// import { getCompetitionRank, getCompetitor, getCompetitionApi } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus'
 import upload from './components/upload.vue'
+
 
 const store = useStore();
 const state = reactive({
@@ -107,6 +110,7 @@ const privateTableData = ref([]);
 const userTableData = ref([]);
 const loading = ref(false);
 const tabChoose = ref('first');
+// const isCompetiionEnd = ref(false);
 
 const handleClick = () => {
     if (tabChoose.value === 'first') {
@@ -123,6 +127,13 @@ const getPublicRankList = async () => {
     const params = {
         private: 0,
     }
+    // const competitionInfo: any = await getCompetitionInfo()
+    // // competition end
+    // if (competitionInfo.end_time && new Date(competitionInfo.end_time).getTime() <= new Date().getTime()) {
+    //     isCompetiionEnd.value = true;
+    //     params.private = 0
+    // }
+
     const res = await getCompetitionRank(params);
     publicTableData.value = formatData(res) || [];
     // set loading
