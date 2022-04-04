@@ -190,7 +190,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
 
             # check if there are any dangerous operations
             sql_file = request.FILES.get('sql')
-            sql = sql_file.read().decode()
+            sql = sql_file.read().decode().lower()
             for op in QueryTask.dangerous_ops:
                 if sql.find(op) != -1:
                     return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Write operation detected! "
