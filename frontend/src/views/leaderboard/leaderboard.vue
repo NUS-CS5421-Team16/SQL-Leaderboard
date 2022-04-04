@@ -98,6 +98,8 @@ import { getCompetitionRank, getCompetitor } from '@/api';
 // import { getCompetitionRank, getCompetitor, getCompetitionApi } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus'
 import upload from './components/upload.vue'
+import { config } from "@/utils/config";
+import axios from "axios";
 
 
 const store = useStore();
@@ -209,8 +211,22 @@ const formatData = (res: any): any => {
 }
 
 const download = (index: number, row: any) => {
-    // window.open(`http://localhost:3000/competition/${sessionStorage.getItem('cid')}/task?tid=${row.id}`)
-    window.open(`/competitor/${sessionStorage.getItem('cid')}/task/?tid=${row.id}`)
+    let requestUrl = config.host + `/competition/${state.cid}/task/?tid=${row.id}`
+    axios.get(requestUrl, { responseType: 'blob' })
+        .then((res) => {
+            const { data, headers } = res
+            const fileName = 'download.sql'
+            const blob = new Blob([data], { type: headers['content-type'] })
+            let dom = document.createElement('a')
+            let url = window.URL.createObjectURL(blob)
+            dom.href = url
+            dom.download = decodeURI(fileName)
+            dom.style.display = 'none'
+            document.body.appendChild(dom)
+            dom.click()
+            dom.parentNode.removeChild(dom)
+            window.URL.revokeObjectURL(url)
+        }).catch((err) => { })
 }
 
 const showMsg = (msg: string) => {

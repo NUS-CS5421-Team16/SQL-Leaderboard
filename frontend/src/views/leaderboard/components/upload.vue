@@ -3,6 +3,7 @@
         ref="uploadRef"
         class="upload-demo"
         name="sql"
+        :headers="headers"
         :action="actionUrl"
         :auto-upload="false"
         :before-upload="beforeUpload"
@@ -21,14 +22,15 @@
 <script lang="ts" setup>
 import { ref, defineProps, defineEmit, reactive, computed } from 'vue';
 import { useStore } from "vuex";
+import store from "@/store";
 import { ElMessageBox } from 'element-plus'
 import { config } from '@/utils/config'
 
 const emit = defineEmit(['uploadSuccess'])
 
 const uploadRef = ref()
-
-const store = useStore();
+const token = "Token " + store.getters.getToken;
+const headers = { Authorization: token };
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
 })
