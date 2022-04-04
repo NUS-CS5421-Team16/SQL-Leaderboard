@@ -31,7 +31,11 @@
             <el-form-item label="Team Name">
                 <el-input v-model="form.team_name" />
             </el-form-item>
+<<<<<<< HEAD
             <el-form-item label="Team ID">
+=======
+            <el-form-item label="Team UUID">
+>>>>>>> 8cdf6bb3149e54ac077745f3bdd25db91d76d5bd
                 <el-input v-model="form.team_uuid" />
             </el-form-item>
             <el-form-item>
@@ -50,7 +54,7 @@ import { ElMessage } from 'element-plus'
 
 const store = useStore();
 const state = reactive({
-    cid: computed(() => store.getters.getCid),
+    cid: computed(() => sessionStorage.getItem('cid')),
 })
 
 const teammateTableData = ref([]);
@@ -61,7 +65,10 @@ const form = reactive({
 })
 
 const onSubmit = async () => {
-    const res = await updateTeam(state.cid, form)
+    let submitted_data = new FormData();
+    submitted_data.append('team_name',form.team_name)
+    submitted_data.append('team_uuid',form.team_uuid)
+    const res = await updateTeam(sessionStorage.getItem('cid'), submitted_data)
     if (res) {
         ElMessage.success('update Success')
     }
@@ -72,13 +79,10 @@ const getDetail = async () => {
     const res = await getCompetitor(sessionStorage.getItem('cid'));
     form.team_name = (res as any).team_name;
     form.team_uuid = (res as any).team_uuid;
-
-    console.log(res)
     teammateTableData.value = (res as any).teammates;
 }
 
 onMounted(() => {
-    // store.commit("setCid", '12212121');
     getDetail();
 })
 </script>

@@ -25,25 +25,9 @@
                 </transition-group>
             </el-breadcrumb>
             <div class="aside__top--right">
-                <div class="email" @click="full">
-                    <span class="el-icon-rank" style="font-size:18px"></span>
-                </div>
                 <div class="user-msg">
                     <!-- <img class="user-img" :src="require('@/assets/image/a.png')" alt=""> -->
-                    <span class="user-name">{{ $t("name") }}</span>
-                    <el-dropdown>
-                        <i class="el-icon-arrow-down el-icon--right"></i>
-                        <template #dropdown>
-                            <el-dropdown-menu>
-                                <el-dropdown-item>{{
-                                    $t("navMy")
-                                }}</el-dropdown-item>
-                                <el-dropdown-item>{{
-                                    $t("pwd")
-                                }}</el-dropdown-item>
-                            </el-dropdown-menu>
-                        </template>
-                    </el-dropdown>
+                    <span class="user-name">{{username}}</span>
                 </div>
                 <div class="quit-system" @click="loginOut">
                     <span class="iconfont el-icon-switch-button"></span>
@@ -66,10 +50,14 @@ import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import screenfull from "screenfull";
 import { createRouter} from "vue-router";
+import router from "@/router";
 export default defineComponent({
     setup() {
         const store = useStore();
         const router = useRouter();
+        console.log("username: ")
+        console.log(sessionStorage.getItem('name'))
+        let username = sessionStorage.getItem('name')
         let state: any = reactive({
             crumbList: computed(() => store.getters.getCrumbList),
             isSidebarNavCollapse: computed(
@@ -85,12 +73,14 @@ export default defineComponent({
         let loginOut = () => {
             router.go(0);
             window.localStorage.removeItem("token");
-            router.replace({ path: "/login" });
+            sessionStorage.clear()
+            router.push({path:"/login"});
+            //router.replace({ path: "/login" });
         };
         return {
+            username,
             state,
             loginOut,
-            full,
             toggleNavCollapse
         };
     },
@@ -186,14 +176,12 @@ export default defineComponent({
                     vertical-align: middle;
                 }
                 .user-name {
-                    color: #758eb5;
                     padding: 0 4px;
                 }
             }
             .iconfont {
                 position: relative;
                 font-size: 24px;
-                color: #758eb5;
             }
         }
     }

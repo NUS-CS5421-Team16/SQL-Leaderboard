@@ -146,6 +146,8 @@ class CompetitorViewset(viewsets.ModelViewSet):
                 target_team.remain_upload_times = max(target_team.remain_upload_times, current_team.remain_upload_times)
                 target_team.entries = target_team.entries + current_team.entries
                 target_team.save()
+                current_teammates = Competitor.objects.filter(team=current_team)
+                current_teammates.update(team=target_team)
                 competitor.team = target_team
                 competitor.save()
                 current_team.delete()
