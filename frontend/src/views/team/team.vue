@@ -49,7 +49,6 @@ const getDetail = async () => {
 }
 
 onMounted(() => {
-    // store.commit("setCid", '12212121');
     getDetail();
 })
 </script>
