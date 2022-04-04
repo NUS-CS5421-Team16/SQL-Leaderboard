@@ -58,33 +58,33 @@ export default defineComponent({
     },
     methods: {
         registerFunc() {
-            let check = this.checkParameter()
-            if (check != null) {
-                ElNotification({
-                    title: 'Error',
-                    message: 'Please enter correct ' + check,
-                    type: 'error',
-                    duration: 1500
-                })
-                return
-            }
             registerApi(this.email, this.username, this.password).then((res:any)=>{
-                console.log(res.data)
+                console.log(res)
+                if (res == -1) {
+                    this.resetData()
+                    ElNotification({
+                        title: 'Error',
+                        message: 'Unknown email',
+                        type: 'error',
+                        duration: 1500
+                    })
+                    return
+                } else {
+                    this.resetData()
+                    ElNotification({
+                        title: 'Success',
+                        message: 'Register successfully',
+                        type: 'success',
+                        duration: 1500
+                    })
+                    this.$router.push({path: "/login"})
+                }
             })
-            //this.$router.push({path: "/login"})
         },
-        checkParameter() {
-            let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
-            if (this.email == "" || !reg.test(this.email)) {
-                return "email"
-            }
-            if (this.username == "") {
-                return "username"
-            }
-            if (this.password == "") {
-                return "password"
-            }
-            return
+        resetData() {
+            this.email = ""
+            this.username = ""
+            this.password = ""
         }
     }
 })

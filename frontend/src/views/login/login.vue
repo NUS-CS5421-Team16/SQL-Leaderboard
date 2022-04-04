@@ -23,9 +23,9 @@
             </p>
             <el-row :gutter="10" type="flex">
                 <el-col :span="100">
-                    <span>No Account?
+                    <span>Haven't registered?
                         <router-link :to="{ path: '/register'}">
-                            <el-link type="primary">Create One</el-link>
+                            <el-link type="primary">Go register</el-link>
                         </router-link>
                     </span>
                 </el-col>
@@ -36,27 +36,11 @@
 
 <script lang="ts">
 import {defineComponent, ref} from 'vue'
-import {loginApi, loginApi2} from "@/api/login";
+import {loginApi} from "@/api/login";
 import { useRouter } from 'vue-router';
 import {useStore} from "vuex";
 import {ElNotification} from "element-plus";
 export default defineComponent({
-    /*setup() {
-        let router=useRouter();
-        let store=useStore();
-
-        let  login =async ()=>{
-            // location.reload();
-            store.commit("SET_PERMISSION",null);
-            router.push({path:"/"});
-            window.localStorage.setItem("token","is token");
-            let res=await loginApi();
-
-        };
-        return {
-            login
-        }
-    },*/
     data() {
         return {
             username: "",
@@ -65,44 +49,19 @@ export default defineComponent({
     },
     methods: {
         loginFunc() {
-            let check = this.checkParameter()
-            console.log("step1")
-            if (check != "ok") {
-                ElNotification({
-                    title: 'Error',
-                    message: 'Please enter correct ' + check,
-                    type: 'error',
-                    duration: 1500
-                })
-                return
-            }
-            loginApi2(this.username, this.password).then((res:any) => {
-                console.log("in")
-                console.log(res.id)
-                console.log(res.role)
-                console.log(res.name)
-                console.log(res.email)
-                if (res.id != -1) {
+            loginApi(this.username, this.password).then((res:any) => {
+                console.log("res: " + res)
+                if (res.token != null) {
                     this.$router.push({path: "/competition-admin"})
                 } else {
                     ElNotification({
                         title: 'Error',
-                        message: 'Please create an account',
+                        message: 'Please register',
                         type: 'error',
                         duration: 1500
                     })
                 }
             })
-        },
-        checkParameter() {
-            let reg = /^([a-zA-Z]|[0-9])(\w|\-)+@[a-zA-Z0-9]+\.([a-zA-Z]{2,4})$/;
-            if (this.username == "" || !reg.test(this.username)) {
-                return "email"
-            }
-            if (this.password == "") {
-                return "password"
-            }
-            return "ok"
         }
     }
 })

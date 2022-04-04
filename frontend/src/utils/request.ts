@@ -8,18 +8,14 @@ axiosNew.defaults.timeout =30000;
 axiosNew.interceptors.request.use(
     config => {
         //config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
-        //let token =sessionStorage.getItem('token');
-        console.log("url: " + config.url)
-        console.log("intercept")
-        console.log("ends with " + config.url?.endsWith("/competition/"))
-        console.log("method " + config.method)
-        if (config.url?.endsWith("/competition/") && config.method == "post") {
-            console.log("success")
-            config.headers['Content-Type'] = 'multipart/form-data; boundary=----WebKitFormBoundaryn8D9asOnAnEU4Js0';
+        if (config.url?.includes("/competition/") && (config.method == "post")) {
+            config.headers['Content-Type'] = 'multipart/form-data';
         }
-        if (store.getters.getToken != "") {
-            let token = "Token " + store.getters.getToken
-            console.log("token: " + token)
+        if (config.url?.includes("/competition/") && (config.method == "put")) {
+            config.headers['Content-Type'] = 'multipart/form-data';
+        }
+        if (!config.url.includes("/register/") && !config.url.includes("/login/") && sessionStorage.getItem('token') != "") {
+            let token = "Token " + sessionStorage.getItem('token')
             config.headers.Authorization = token
         }
         /*if (token) {
@@ -37,22 +33,26 @@ axiosNew.interceptors.request.use(
 axiosNew.interceptors.response.use(response => {
         try{
             let token = response.data.token;
+            // store info from login response
             if(token != null){
-                //store.dispatch('tokenChange',token);
-                //store.state.token = token
+                sessionStorage.setItem('token', token)
+                sessionStorage.setItem('cid', response.data.id)
+                sessionStorage.setItem('email', response.data.email)
+                sessionStorage.setItem('name', response.data.name)
+                sessionStorage.setItem('role', response.data.role)
                 store.commit('setToken', token)
-            }
-            if (response.data.cid != null) {
-                store.commit('setCid', response.data.cid)
-            }
-            if (response.data.email != null) {
-                store.commit('setEmail', response.data.email)
-            }
-            if (response.data.name != null) {
-                store.commit('setName', response.data.name)
-            }
-            if (response.data.role != null) {
-                store.commit('setRole', response.data.role)
+                if (response.data.id != null) {
+                    store.commit('setCid', response.data.id)
+                }
+                if (response.data.email != null) {
+                    store.commit('setEmail', response.data.email)
+                }
+                if (response.data.name != null) {
+                    store.commit('setName', response.data.name)
+                }
+                if (response.data.role != null) {
+                    store.commit('setRole', response.data.role)
+                }
             }
         }catch(err){
             console.log("Don't need to get token for this response",err)
@@ -74,7 +74,7 @@ axiosNew.interceptors.response.use(response => {
 const axios=function({path,method="GET",data={}}:any={}){
     return new Promise((resolve,reject)=>{
         let datas:object={params:{...data}}
-        if(method==="POST") datas={...{data}};
+        datas={...{data}};
         axiosNew({
             url:`${config.host}${path}`,
             method,
