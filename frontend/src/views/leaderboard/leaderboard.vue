@@ -210,7 +210,7 @@ const showMsg = (msg: string) => {
 
 // dom ready
 onMounted(async () => {
-    getRankList();
+    getPublicRankList();
 })
 </script>
 
