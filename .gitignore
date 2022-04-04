@@ -1,7 +1,9 @@
 /env_lb/
 *.pyc
 backend/Pipfile
+backend/template
 backend/upload
 .idea
 .DS_Store
 node_modules
+*.db

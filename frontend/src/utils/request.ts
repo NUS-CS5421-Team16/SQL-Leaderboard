@@ -4,14 +4,21 @@ import {config} from '@/utils/config'
 import store from "@/store";
 import router from "@/router";
 axiosNew.defaults.timeout =30000;
+import { ElMessage, ElMessageBox } from 'element-plus'
 
 axiosNew.interceptors.request.use(
     config => {
         //config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        if (sessionStorage.getItem('token') == null) {
+            router.push({path:"/login"});
+        }
         if (config.url?.includes("/competition/") && (config.method == "post")) {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
         if (config.url?.includes("/competition/") && (config.method == "put")) {
+            config.headers['Content-Type'] = 'multipart/form-data';
+        }
+        if (config.url?.includes("/competitor/") && (config.method == "put")) {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
         if (!config.url.includes("/register/") && !config.url.includes("/login/") && sessionStorage.getItem('token') != "") {
@@ -32,7 +39,7 @@ axiosNew.interceptors.request.use(
 
 axiosNew.interceptors.response.use(response => {
         try{
-            let token = response.data.token;
+            let token = response?.data?.token;
             // store info from login response
             if(token != null){
                 sessionStorage.setItem('token', token)
@@ -81,7 +88,28 @@ const axios=function({path,method="GET",data={}}:any={}){
             ...datas
         }).then(res=>{
             resolve(res.data)
-        }).catch(err=>{resolve(-1)})
+        }).catch(err=>{
+            const status = `${err.response.status}`;
+            const prefix = status[0];
+            if (prefix === "4" || prefix === "5") {
+                const data = err.response.data;
+                let str: string = "";
+                if (
+                    Object.prototype.toString.call(data) ===
+                    "[object String]"
+                ) {
+                    str = `HTTP status code: ${status}`;
+                } else if (data.hasOwnProperty("message")) {
+                    str = data.message;
+                } else {
+                    str = JSON.stringify(data);
+                }
+                ElMessageBox.alert(str, "Error msg", {
+                    confirmButtonText: "OK",
+                });
+            }
+            resolve(-1)
+        })
     })
 };
 export default axios

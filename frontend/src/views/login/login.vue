@@ -52,7 +52,7 @@ export default defineComponent({
             loginApi(this.username, this.password).then((res:any) => {
                 console.log("res: " + res)
                 if (res.token != null) {
-                    this.$router.push({path: "/competition-admin"})
+                    this.$router.push({path: "/leaderboard"})
                 } else {
                     ElNotification({
                         title: 'Error',
