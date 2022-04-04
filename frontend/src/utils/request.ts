@@ -89,7 +89,9 @@ const axios=function({path,method="GET",data={}}:any={}){
         }).then(res=>{
             resolve(res.data)
         }).catch(err=>{
-            if(err.response.status === 400) {
+            const status  = `${err.response.status}`
+            const prefix = status[0]
+            if (prefix === '4' || prefix === '5') {
                 const msg = err.response.data.message;
                 ElMessageBox.alert(msg, 'Error msg', {
                     confirmButtonText: 'OK',
