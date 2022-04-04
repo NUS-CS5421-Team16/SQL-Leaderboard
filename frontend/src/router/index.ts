@@ -106,7 +106,7 @@ export const DynamicRoutes = [
                 name: "leaderboard",
                 meta: {
                     name: "Leaderboard",
-                    icon: "el-icon-s-home",
+                    icon: "el-icon-house",
                 },
             },
             {
@@ -115,7 +115,7 @@ export const DynamicRoutes = [
                 name: "team",
                 meta: {
                     name: "Team",
-                    icon: "el-icon-s-home",
+                    icon: "el-icon-user",
                 },
             },
             {

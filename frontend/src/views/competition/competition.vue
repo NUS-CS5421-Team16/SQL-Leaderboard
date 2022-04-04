@@ -1,5 +1,9 @@
 <template>
     <div style="padding: 50px" v-loading="loading">
+        <el-row>
+            <el-button type="primary" size="small" icon="el-icon-download" @click="downloadPublic">Public Dataset</el-button>
+            <el-button type="success" size="small" icon="el-icon-download" @click="downloadReference">Reference SQL</el-button>
+        </el-row>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
             <el-tab-pane label="Competition Info" name="first">
                 <el-table :data="table" style="width: 100%">
@@ -181,8 +185,10 @@
 <script lang="ts">
 import {defineComponent, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
-import {postCompetitionApi, getCompetitionApi, putCompetitionApi} from "@/api/competition";
+import {postCompetitionApi, getCompetitionApi, putCompetitionApi, getPublic, getReference} from "@/api/competition";
 import store from "@/store";
+import axios from "axios";
+import {config} from "@/utils/config";
 
 export default defineComponent ({
     inject:['reload'],
@@ -373,6 +379,46 @@ export default defineComponent ({
         },
         handleClick(tab, event){
             console.log(tab, event)
+        },
+        downloadPublic() {
+            let requestUrl = config.host + '/competition/download_public/'
+            console.log("download url: ")
+            console.log(requestUrl)
+            axios.get(requestUrl, {responseType: 'blob'})
+                .then((res) => {
+                    const { data, headers } = res
+                    const fileName = 'public_dataset.sql'
+                    const blob = new Blob([data], {type: headers['content-type']})
+                    let dom = document.createElement('a')
+                    let url = window.URL.createObjectURL(blob)
+                    dom.href = url
+                    dom.download = decodeURI(fileName)
+                    dom.style.display = 'none'
+                    document.body.appendChild(dom)
+                    dom.click()
+                    dom.parentNode.removeChild(dom)
+                    window.URL.revokeObjectURL(url)
+                }).catch((err) => {})
+        },
+        downloadReference() {
+            let requestUrl = config.host + '/competition/download_reference/'
+            console.log("download url: ")
+            console.log(requestUrl)
+            axios.get(requestUrl, {responseType: 'blob'})
+                .then((res) => {
+                    const { data, headers } = res
+                    const fileName = 'reference.sql'
+                    const blob = new Blob([data], {type: headers['content-type']})
+                    let dom = document.createElement('a')
+                    let url = window.URL.createObjectURL(blob)
+                    dom.href = url
+                    dom.download = decodeURI(fileName)
+                    dom.style.display = 'none'
+                    document.body.appendChild(dom)
+                    dom.click()
+                    dom.parentNode.removeChild(dom)
+                    window.URL.revokeObjectURL(url)
+                }).catch((err) => {})
         }
     },
     data() {
@@ -442,7 +488,17 @@ export default defineComponent ({
                 this.role = "administrator"
             }
         })
-    }
+    },
+    /*mounted() {
+        window.addEventListener('storage', (e) => {
+            if (sessionStorage.getItem('token') == null) {
+                console.log("no token, jump to login")
+                this.$router.push({path: "/login"})
+            } else {
+                console.log("has token")
+            }
+        });
+    }*/
 })
 </script>
 
