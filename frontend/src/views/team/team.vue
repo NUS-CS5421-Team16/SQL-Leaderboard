@@ -32,7 +32,11 @@
                 <el-input v-model="form.team_name" />
             </el-form-item>
 <<<<<<< HEAD
+<<<<<<< HEAD
             <el-form-item label="Team ID">
+=======
+            <el-form-item label="Team UUID">
+>>>>>>> 8cdf6bb3149e54ac077745f3bdd25db91d76d5bd
 =======
             <el-form-item label="Team UUID">
 >>>>>>> 8cdf6bb3149e54ac077745f3bdd25db91d76d5bd
