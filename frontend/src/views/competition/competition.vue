@@ -185,7 +185,7 @@
 <script lang="ts">
 import {defineComponent, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
-import {postCompetitionApi, getCompetitionApi, putCompetitionApi, getPublic, getReference} from "@/api/competition";
+import {postCompetitionApi, getCompetitionApi, putCompetitionApi} from "@/api/competition";
 import store from "@/store";
 import axios from "axios";
 import {config} from "@/utils/config";
@@ -382,8 +382,6 @@ export default defineComponent ({
         },
         downloadPublic() {
             let requestUrl = config.host + '/competition/download_public/'
-            console.log("download url: ")
-            console.log(requestUrl)
             axios.get(requestUrl, {responseType: 'blob'})
                 .then((res) => {
                     const { data, headers } = res
@@ -402,8 +400,6 @@ export default defineComponent ({
         },
         downloadReference() {
             let requestUrl = config.host + '/competition/download_reference/'
-            console.log("download url: ")
-            console.log(requestUrl)
             axios.get(requestUrl, {responseType: 'blob'})
                 .then((res) => {
                     const { data, headers } = res
@@ -488,17 +484,7 @@ export default defineComponent ({
                 this.role = "administrator"
             }
         })
-    },
-    /*mounted() {
-        window.addEventListener('storage', (e) => {
-            if (sessionStorage.getItem('token') == null) {
-                console.log("no token, jump to login")
-                this.$router.push({path: "/login"})
-            } else {
-                console.log("has token")
-            }
-        });
-    }*/
+    }
 })
 </script>
 

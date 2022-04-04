@@ -22,17 +22,3 @@ export const postCompetitionApi=(data:FormData)=>{
         data: data
     })
 }
-
-export const getPublic=()=>{
-    return axios({
-        path:"/competition/download_public/",
-        method:"GET",
-    })
-}
-
-export const getReference=()=>{
-    return axios({
-        path:"/competition/download_reference/",
-        method:"GET",
-    })
-}
