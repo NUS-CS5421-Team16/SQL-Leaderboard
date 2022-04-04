@@ -111,8 +111,7 @@ class QueryTask(Task):
         PRIVATE = "private"
         PUBLIC = "public"
 
-    dangerous_ops = ['update', 'create', 'delete', 'alter', 'drop', 'truncate', 'insert',
-                     'UPDATE', 'CREATE', 'DELETE', 'ALTER', 'DROP', 'TRUNCATE', 'INSERT']
+    dangerous_ops = ['update', 'create', 'delete', 'alter', 'drop', 'truncate', 'insert']
 
     query_type = models.CharField(max_length=32, choices=QueryTaskType.choices, null=True)
     competitor = models.ForeignKey(Competitor, on_delete=models.CASCADE, null=False)
