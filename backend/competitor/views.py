@@ -87,12 +87,21 @@ class CompetitorViewset(viewsets.ModelViewSet):
         tasks = QueryTask.objects.filter(competitor__team=team).order_by("start_time")
         tasks_serializer = QueryTaskSerializer(tasks, many=True)
         latest_task_serializer = QueryTaskSerializer(tasks.first())
+        teammate_instances = Competitor.objects.filter(team=team).order_by("id")
+        teammates = []
+        for instance in teammate_instances:
+            temp = {
+                "competitor id": instance.id,
+                "name": instance.username
+            }
+            teammates.append(temp)
 
         result_data = {
             "id": competitor_instance.id,
             "name": request.user.username,
             "team_uuid": competitor_instance.team.uuid,
             "team_name": competitor_instance.team.name,
+            "teammates": teammates,
             "latest_task": latest_task_serializer.data,
             "tasks": tasks_serializer.data,
             "remain_upload_times": team.remain_upload_times
