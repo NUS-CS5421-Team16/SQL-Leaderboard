@@ -43,7 +43,6 @@ class CompetitionViewset(viewsets.ModelViewSet):
         return super(CompetitionViewset, self).retrieve(request, *args, **kwargs)
 
     def create(self, request, *args, **kwargs):
-        # TODO: if have 1 valid competition, skip
         competitions = Competition.objects.all()
         if competitions.exists():
             return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "competition already exists!"})

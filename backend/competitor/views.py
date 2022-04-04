@@ -137,6 +137,8 @@ class CompetitorViewset(viewsets.ModelViewSet):
                 target_team.remain_upload_times = max(target_team.remain_upload_times, current_team.remain_upload_times)
                 target_team.entries = target_team.entries + current_team.entries
                 target_team.save()
+                current_teammates = Competitor.objects.filter(team=current_team)
+                current_teammates.update(team=target_team)
                 competitor.team = target_team
                 competitor.save()
                 current_team.delete()
@@ -190,7 +192,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
 
             # check if there are any dangerous operations
             sql_file = request.FILES.get('sql')
-            sql = sql_file.read().decode()
+            sql = sql_file.read().decode().lower()
             for op in QueryTask.dangerous_ops:
                 if sql.find(op) != -1:
                     return Response(status=status.HTTP_400_BAD_REQUEST, data={"message": "Write operation detected! "
