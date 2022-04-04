@@ -9,6 +9,9 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 axiosNew.interceptors.request.use(
     config => {
         //config.headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        if (sessionStorage.getItem('token') == null) {
+            router.push({path:"/login"});
+        }
         if (config.url?.includes("/competition/") && (config.method == "post")) {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
