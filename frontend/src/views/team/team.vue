@@ -3,10 +3,10 @@
         <el-button style="margin-bottom: 20px;" type="primary" @click="getDetail">Refresh</el-button>
         <el-form :model="form" label-width="120px">
             <el-form-item label="Team Name">
-                <el-input v-model="form.name" />
+                <el-input v-model="form.team_name" />
             </el-form-item>
-            <el-form-item label="Team ID">
-                <el-input v-model="form.id" />
+            <el-form-item label="Team UUID">
+                <el-input v-model="form.team_uuid" />
             </el-form-item>
             <el-form-item>
                 <el-button type="primary" @click="onSubmit">Update</el-button>
@@ -23,16 +23,19 @@ import { ElMessage } from 'element-plus'
 
 const store = useStore();
 const state = reactive({
-    cid: computed(() => store.getters.getCid),
+    cid: computed(() => sessionStorage.getItem('cid')),
 })
 
 const form = reactive({
-    name: '',
-    id: '',
+    team_name: '',
+    team_uuid: '',
 })
 
 const onSubmit = async () => {
-    const res = await updateTeam(state.cid, form)
+    let submitted_data = new FormData();
+    submitted_data.append('team_name',form.team_name)
+    submitted_data.append('team_uuid',form.team_uuid)
+    const res = await updateTeam(sessionStorage.getItem('cid'), submitted_data)
     if (res) {
         ElMessage.success('update Success')
     }
@@ -40,13 +43,12 @@ const onSubmit = async () => {
 }
 
 const getDetail = async () => {
-    const res = await getCompetitor(state.cid);
-    form.name = (res as any).name;
-    form.id = (res as any).id;
+    const res = await getCompetitor(sessionStorage.getItem('cid'));
+    form.team_name = (res as any).team_name;
+    form.team_uuid = (res as any).team_uuid;
 }
 
 onMounted(() => {
-    // store.commit("setCid", '12212121');
     getDetail();
 })
 </script>

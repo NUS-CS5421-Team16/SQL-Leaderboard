@@ -75,7 +75,7 @@
    celery -A backend worker -l info -P solo
    
    # after the worker is ready(the following output is shown)
-   # [2022-03-28 22:18:22,525: INFO/MainProcess] celery@vincent ready.
+   # [2022-XX-XX 22:18:22,525: INFO/MainProcess] celery@User ready.
    # run beat
    celery -A backend beat -l info
    ```
@@ -90,10 +90,12 @@
 
 To combine frontend and backend and run them together, there are some additional steps:
 
-1. Install `npm` and `node`
-2. `cd frontend`
-3. Run build: `npm run build`. Then you will see `static/` in `backend/template`
-4. Then start django as described above.
+1. Install `npm` and `node`.
+2. `cd frontend`.
+3. Run `npm install`
+4. Run build: `npm run build`. Then you will see `static/` in `backend/template`.
+5. If you get an error in step 3 because `vue-cli-service: command not found`, try `npm ci && npm run build`.
+6. Then start django as described above.
 
 ## Reference Website (Internal Review)
 

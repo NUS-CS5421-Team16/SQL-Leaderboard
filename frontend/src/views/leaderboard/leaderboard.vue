@@ -1,14 +1,14 @@
 <template>
     <div style="padding: 20px;">
         <div class="operation">
-            <el-button class="search-btn" type="primary" @click="getRankList">Refresh</el-button>
+            <el-button class="search-btn" type="primary" @click="getPublicRankList">Refresh</el-button>
             <upload @uploadSuccess="handleClick"></upload>
         </div>
 
         <el-tabs v-model="tabChoose" class="demo-tabs" @tab-click="handleClick">
-            <el-tab-pane label="Leaderboard" name="first">
+            <el-tab-pane label="Leaderboard-Public" name="first">
                 <vxe-table
-                    :data="tableData"
+                    :data="publicTableData"
                     v-loading="loading"
                     empty-text="No data"
                     v-if="tabChoose === 'first'"
@@ -28,12 +28,34 @@
                     </vxe-table-column>
                 </vxe-table>
             </el-tab-pane>
-            <el-tab-pane label="Current User Result" name="second">
+            <el-tab-pane label="Leaderboard-Private" name="second">
+            <vxe-table
+                :data="privateTableData"
+                v-loading="loading"
+                empty-text="No data"
+                v-if="tabChoose === 'second'"
+            >
+              <vxe-table-column field="index" title="#"></vxe-table-column>
+              <vxe-table-column field="team_name" title="Team Name"></vxe-table-column>
+              <vxe-table-column field="entries" title="Entries"></vxe-table-column>
+              <vxe-table-column title="Time">
+                <template #default="scope">
+                            <span
+                                v-if="scope.row.running_time && scope.row.running_time !== '-'"
+                            >{{ scope.row.running_time }}ms</span>
+                  <span
+                      v-else-if="scope.row.running_time && scope.row.running_time === '-'"
+                  >-</span>
+                </template>
+              </vxe-table-column>
+            </vxe-table>
+          </el-tab-pane>
+            <el-tab-pane label="Current User Result" name="third">
                 <vxe-table
-                    :data="tableData"
+                    :data="userTableData"
                     v-loading="loading"
                     empty-text="No data"
-                    v-if="tabChoose === 'second'"
+                    v-if="tabChoose === 'third'"
                 >
                     <vxe-table-column field="index" title="#"></vxe-table-column>
                     <vxe-table-column field="team_name" title="Team"></vxe-table-column>
@@ -77,36 +99,53 @@ import upload from './components/upload.vue'
 
 const store = useStore();
 const state = reactive({
-    cid: computed(() => store.getters.getCid),
+    cid: computed(() => sessionStorage.getItem('cid')),
 })
 
-const tableData = ref([]);
+const publicTableData = ref([]);
+const privateTableData = ref([]);
+const userTableData = ref([]);
 const loading = ref(false);
 const tabChoose = ref('first');
 
 const handleClick = () => {
     if (tabChoose.value === 'first') {
-        getRankList();
+        getPublicRankList();
     } else if (tabChoose.value === 'second') {
+        getPrivateRankList();
+    } else if (tabChoose.value === 'third') {
         getCompetitorTask();
     }
 }
 
-const getRankList = async () => {
+const getPublicRankList = async () => {
     loading.value = true;
     const params = {
-        private: 1,
+        private: 0,
     }
     const res = await getCompetitionRank(params);
-    tableData.value = formatData(res) || [];
+    publicTableData.value = formatData(res) || [];
     // set loading
     setTimeout(() => {
         loading.value = false;
     }, 300);
 }
 
+const getPrivateRankList = async () => {
+    loading.value = true;
+    const params = {
+      private: 1,
+    }
+    const res = await getCompetitionRank(params);
+    privateTableData.value = formatData(res) || [];
+    // set loading
+    setTimeout(() => {
+      loading.value = false;
+    }, 300);
+}
+
 const getCompetitorTask = async () => {
-    const res = await getCompetitor(state.cid);
+    const res = await getCompetitor(sessionStorage.getItem('cid'));
 
     const tasks = (res as any).tasks || [];
 
@@ -116,7 +155,7 @@ const getCompetitorTask = async () => {
         task.index = len - index;
     })
 
-    tableData.value = (res as any).tasks
+    userTableData.value = (res as any).tasks
 
     setTimeout(() => {
         loading.value = false;
@@ -159,8 +198,8 @@ const formatData = (res: any): any => {
 }
 
 const download = (index: number, row: any) => {
-    // window.open(`http://localhost:3000/competition/${state.cid}/task?tid=${row.id}`)
-    window.open(`/competition/${state.cid}/task/?tid=${row.id}`)
+    // window.open(`http://localhost:3000/competition/${sessionStorage.getItem('cid')}/task?tid=${row.id}`)
+    window.open(`/competitor/${sessionStorage.getItem('cid')}/task/?tid=${row.id}`)
 }
 
 const showMsg = (msg: string) => {
@@ -171,7 +210,7 @@ const showMsg = (msg: string) => {
 
 // dom ready
 onMounted(async () => {
-    getRankList();
+    getPublicRankList();
 })
 </script>
 
