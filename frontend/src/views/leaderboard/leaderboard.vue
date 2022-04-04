@@ -77,7 +77,7 @@ import upload from './components/upload.vue'
 
 const store = useStore();
 const state = reactive({
-    cid: computed(() => store.getters.getCid),
+    cid: computed(() => sessionStorage.getItem('cid')),
 })
 
 const tableData = ref([]);
@@ -95,7 +95,7 @@ const handleClick = () => {
 const getRankList = async () => {
     loading.value = true;
     const params = {
-        private: 1,
+        private: 0,
     }
     const res = await getCompetitionRank(params);
     tableData.value = formatData(res) || [];
@@ -106,7 +106,7 @@ const getRankList = async () => {
 }
 
 const getCompetitorTask = async () => {
-    const res = await getCompetitor(state.cid);
+    const res = await getCompetitor(sessionStorage.getItem('cid'));
 
     const tasks = (res as any).tasks || [];
 
@@ -159,8 +159,8 @@ const formatData = (res: any): any => {
 }
 
 const download = (index: number, row: any) => {
-    // window.open(`http://localhost:3000/competition/${state.cid}/task?tid=${row.id}`)
-    window.open(`/competition/${state.cid}/task/?tid=${row.id}`)
+    // window.open(`http://localhost:3000/competition/${sessionStorage.getItem('cid')}/task?tid=${row.id}`)
+    window.open(`/competitor/${sessionStorage.getItem('cid')}/task/?tid=${row.id}`)
 }
 
 const showMsg = (msg: string) => {

@@ -30,10 +30,10 @@ const uploadRef = ref()
 
 const store = useStore();
 const state = reactive({
-    cid: computed(() => store.getters.getCid),
+    cid: computed(() => sessionStorage.getItem('cid')),
 })
 
-const actionUrl = ref(`${config.host}/competitor/${state.cid}/task/`);
+const actionUrl = ref(`${config.host}/competitor/${sessionStorage.getItem('cid')}/task/`);
 
 const submitUpload = async () => {
     uploadRef.value!.submit()

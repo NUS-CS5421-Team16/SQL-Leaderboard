@@ -4,7 +4,6 @@ import axios from "@/utils/request";
 export const getCompetitionRank = (data: any): any => {
     return axios({
         method: "",
-        path: "/competition/rank/",
-        data,
+        path: `/competition/rank/?private=${data.private}`,
     });
 };

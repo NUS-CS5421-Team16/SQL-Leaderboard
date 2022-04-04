@@ -1,7 +1,8 @@
 import axios from "@/utils/request";
 
 // Update Team
-export const updateTeam = (cid: string, data: any) => {
+export const updateTeam = (cid: string, data: FormData) => {
+  console.log(data)
   return axios({
     method: "PUT",
     path: `/competitor/${cid}/team/`,
