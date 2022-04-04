@@ -188,51 +188,72 @@ export default defineComponent ({
     inject:['reload'],
     methods: {
         getFile(target:any) {
-            switch (target) {
-                case "reference_query":
-                    this.formData.append("reference_query", (<HTMLInputElement>document.getElementById("reference_query")).files[0])
-                    break
-                case "competitor_info":
-                    this.formData.append("competitor_info", (<HTMLInputElement>document.getElementById("competitor_info")).files[0])
-                    break
-                case "public_sql":
-                    this.formData.append("public_sql",  (<HTMLInputElement>document.getElementById("public_sql")).files[0])
-                    break
-                case "private_sql":
-                    this.formData.append("private_sql", (<HTMLInputElement>document.getElementById("private_sql")).files[0])
-                    break
-                default:
-                    break
+            if (this.has_competition == true) {
+                switch (target) {
+                    case "reference_query":
+                        this.updateData.append("reference_query", (<HTMLInputElement>document.getElementById("reference_query")).files[0])
+                        break
+                    case "competitor_info":
+                        this.updateData.append("competitor_info", (<HTMLInputElement>document.getElementById("competitor_info")).files[0])
+                        break
+                    case "public_sql":
+                        this.updateData.append("public_sql",  (<HTMLInputElement>document.getElementById("public_sql")).files[0])
+                        break
+                    case "private_sql":
+                        this.updateData.append("private_sql", (<HTMLInputElement>document.getElementById("private_sql")).files[0])
+                        break
+                    default:
+                        break
+                }
+            } else {
+                switch (target) {
+                    case "reference_query":
+                        this.formData.append("reference_query", (<HTMLInputElement>document.getElementById("reference_query")).files[0])
+                        break
+                    case "competitor_info":
+                        this.formData.append("competitor_info", (<HTMLInputElement>document.getElementById("competitor_info")).files[0])
+                        break
+                    case "public_sql":
+                        this.formData.append("public_sql",  (<HTMLInputElement>document.getElementById("public_sql")).files[0])
+                        break
+                    case "private_sql":
+                        this.formData.append("private_sql", (<HTMLInputElement>document.getElementById("private_sql")).files[0])
+                        break
+                    default:
+                        break
+                }
             }
         },
         onUpdate() {
-            this.formData.append("name", this.form.name)
-            this.formData.append("description", this.form.description)
-            this.formData.append("upload_limit", this.form.upload_limit)
-            this.formData.append("concurrent_limit", this.form.concurrent_limit.toString())
-            this.formData.append("running_time_limit", this.form.running_time_limit)
-            this.formData.append("end_time", this.deadline)
+            let tempFormData = new FormData()
+            this.updateData.append("name", this.form.name)
+            this.updateData.append("description", this.form.description)
+            this.updateData.append("upload_limit", this.form.upload_limit)
+            this.updateData.append("concurrent_limit", this.form.concurrent_limit.toString())
+            this.updateData.append("running_time_limit", this.form.running_time_limit)
+            this.updateData.append("end_time", this.deadline)
             if (this.descendent) {
-                this.formData.append("descendent_ordering", "true")
+                this.updateData.append("descendent_ordering", "true")
             } else {
-                this.formData.append("descendent_ordering", "false")
+                this.updateData.append("descendent_ordering", "false")
             }
             this.loading = true
-            putCompetitionApi(this.formData).then((res:any) => {
+            putCompetitionApi(this.updateData, this.competition_id).then((res:any) => {
+                this.updateData.delete('reference_query')
+                this.updateData.delete('competitor_info')
+                this.updateData.delete('public_sql')
+                this.updateData.delete('private_sql')
+                this.updateData = new FormData();
                 if (res.id != null) {
                     this.has_competition = true
                     getCompetitionApi().then((res:any) => {
                         if (res.id != null) {
-                            console.log("competitor_info: " + res.competitor_info)
-                            console.log("reference_query: " + res.reference_query)
-                            console.log("private_sql: " + res.private_sql)
-                            console.log("public_sql: " + res.public_sql)
+                            this.competition_id = res.id
                             this.form.name = res.name
                             this.form.concurrent_limit = res.concurrent_limit
                             this.form.description = res.description
                             this.form.running_time_limit = res.running_time_limit
                             this.form.upload_limit = res.upload_limit
-                            console.log("desc: " + res.descendent_ordering)
                             if (res.descendent_ordering) {
                                 this.descendent = true
                             } else {
@@ -251,22 +272,22 @@ export default defineComponent ({
                                 this.tableData.ordering = "ascendant"
                             }
                             this.tableData.deadline = res.end_time
+                            this.table.pop()
                             this.table.push(this.tableData)
-                            console.log("role: " + this.role)
                         } else {
                             this.role = "administrator"
                         }
                     })
+                    this.loading = false
+                    this.role = "administrator"
+                    this.activeName = "third"
+                    location.reload()
                     ElNotification({
                         title: 'Success',
                         message: 'Update competition successfully',
                         type: 'success',
                         duration: 1500
                     })
-                    this.loading = false
-                    this.role = "administrator"
-                    this.activeName = "third"
-                    //this.$router.push({path: "/competition-admin"})
                 } else {
                     ElNotification({
                         title: 'Error',
@@ -298,16 +319,12 @@ export default defineComponent ({
                     this.role = "administrator"
                     getCompetitionApi().then((res:any) => {
                         if (res.id != null) {
-                            console.log("competitor_info: " + res.competitor_info)
-                            console.log("reference_query: " + res.reference_query)
-                            console.log("private_sql: " + res.private_sql)
-                            console.log("public_sql: " + res.public_sql)
+                            this.competition_id = res.id
                             this.form.name = res.name
                             this.form.concurrent_limit = res.concurrent_limit
                             this.form.description = res.description
                             this.form.running_time_limit = res.running_time_limit
                             this.form.upload_limit = res.upload_limit
-                            console.log("desc: " + res.descendent_ordering)
                             if (res.descendent_ordering) {
                                 this.descendent = true
                             } else {
@@ -327,21 +344,20 @@ export default defineComponent ({
                             }
                             this.tableData.deadline = res.end_time
                             this.table.push(this.tableData)
-                            console.log("role: " + this.role)
                         } else {
                             this.role = "administrator"
                         }
                     })
+                    this.loading = false
+                    this.role = "administrator"
+                    this.activeName = "third"
+                    location.reload()
                     ElNotification({
                         title: 'Success',
                         message: 'Create competition successfully',
                         type: 'success',
                         duration: 1500
                     })
-                    this.loading = false
-                    this.role = "administrator"
-                    this.activeName = "third"
-                    //this.$router.push({path: "/competition-admin"})
                 } else {
                     this.role = "administrator"
                     ElNotification({
@@ -387,25 +403,22 @@ export default defineComponent ({
             createDialog: false,
             updateDialog: false,
             activeName: "first",
-            role: ""
+            role: "",
+            competition_id: -1,
+            updateData: new FormData()
         }
     },
     created() {
-        this.role = store.getters.getRole
-        console.log("current role: " + this.role)
-        console.log("current has competition: " + this.has_competition)
+        //this.role = store.getters.getRole
+        this.role = sessionStorage.getItem('role')
         getCompetitionApi().then((res:any) => {
             if (res.id != null) {
-                console.log("competitor_info: " + res.competitor_info)
-                console.log("reference_query: " + res.reference_query)
-                console.log("private_sql: " + res.private_sql)
-                console.log("public_sql: " + res.public_sql)
+                this.competition_id = res.id
                 this.form.name = res.name
                 this.form.concurrent_limit = res.concurrent_limit
                 this.form.description = res.description
                 this.form.running_time_limit = res.running_time_limit
                 this.form.upload_limit = res.upload_limit
-                console.log("desc: " + res.descendent_ordering)
                 if (res.descendent_ordering) {
                     this.descendent = true
                 } else {
@@ -425,7 +438,6 @@ export default defineComponent ({
                 }
                 this.tableData.deadline = res.end_time
                 this.table.push(this.tableData)
-                console.log("role: " + this.role)
             } else {
                 this.role = "administrator"
             }

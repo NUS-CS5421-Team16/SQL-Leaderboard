@@ -6,9 +6,10 @@ export const getCompetitionApi=()=>{
     })
 }
 
-export const putCompetitionApi=(data:FormData)=>{
+export const putCompetitionApi=(data:FormData, cid)=>{
+    console.log("api: " + data)
     return axios({
-        path:"/competition/",
+        path:"/competition/" + cid + "/",
         method:"PUT",
         data: data
     })
