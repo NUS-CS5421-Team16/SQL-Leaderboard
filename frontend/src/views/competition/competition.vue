@@ -31,7 +31,7 @@
                             v-model="deadline"
                             type="datetime"
                             :placeholder="deadlinePlaceholder"
-                            value-format="YYYY-MM-DDThh:mm:ss Z"
+                            value-format="YYYY-MM-DDTHH:mm:ss Z"
                         />
                     </el-form-item>
                     <el-form-item label="Upload limit">
@@ -112,7 +112,7 @@
                             v-model="deadline"
                             type="datetime"
                             :placeholder="deadlinePlaceholder"
-                            value-format="YYYY-MM-DDThh:mm:ss Z"
+                            value-format="YYYY-MM-DDTHH:mm:ss Z"
                         />
                     </el-form-item>
                     <el-form-item label="Upload limit">
