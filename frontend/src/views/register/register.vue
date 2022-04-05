@@ -60,16 +60,8 @@ export default defineComponent({
         registerFunc() {
             registerApi(this.email, this.username, this.password).then((res:any)=>{
                 console.log(res)
-                if (res == -1) {
-                    this.resetData()
-                    ElNotification({
-                        title: 'Error',
-                        message: 'Unknown email',
-                        type: 'error',
-                        duration: 1500
-                    })
-                    return
-                } else {
+                this.resetData()
+                if (res != -1) {
                     this.resetData()
                     ElNotification({
                         title: 'Success',
