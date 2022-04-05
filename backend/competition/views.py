@@ -91,6 +91,15 @@ class CompetitionViewset(viewsets.ModelViewSet):
         return super(CompetitionViewset, self).destroy(request, *args, **kwargs)
 
     @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
+    def has_competition(self, request, *agrs, **kwargs):
+        competitions = Competition.objects.all()
+        if competitions.exists():
+            data = {"has_competition": True}
+        else:
+            data = {"has_competition": False}
+        return Response(status=status.HTTP_200_OK, data=data)
+
+    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
     def rank(self, request, *args, **kwargs):
         try:
             is_private = bool(int(request.query_params.get('private')))
