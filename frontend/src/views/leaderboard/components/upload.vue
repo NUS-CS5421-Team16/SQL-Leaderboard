@@ -30,7 +30,7 @@ const emit = defineEmit(['uploadSuccess'])
 
 const uploadRef = ref()
 
-const token = "Token " + store.getters.getToken;
+const token = "Token " + sessionStorage.getItem('token');
 const headers = { Authorization: token };
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
@@ -49,7 +49,7 @@ const handleSuccess = (res: any) => {
 
 const handleError = (err: any) => {
     uploadRef.value.clearFiles()
-    alertMsg();
+    alertMsg(err.toString());
 }
 
 const handleChange = (file: any, files: any) => {
@@ -69,8 +69,8 @@ const beforeUpload = (file: any) => {
 }
 
 // message alert
-const alertMsg = () => {
-    ElMessageBox.alert('Please note that the file must not contain dangerous operations!', 'alert');
+const alertMsg = (msg: string) => {
+    ElMessageBox.alert(msg, 'WARNING');
 }
 </script>
 

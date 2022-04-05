@@ -165,6 +165,7 @@ const getCompetitorTask = async () => {
     // set order for tasks
     tasks.forEach((task: any, index: number) => {
         task.index = len - index;
+        task.start_time = new Date(task.start_time).toLocaleString();
     })
 
     userTableData.value = (res as any).tasks
