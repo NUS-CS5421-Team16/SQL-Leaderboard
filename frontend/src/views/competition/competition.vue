@@ -5,7 +5,7 @@
             <el-button type="success" size="small" icon="el-icon-download" @click="downloadReference">Reference SQL</el-button>
         </el-row>
         <el-tabs v-model="activeName" class="demo-tabs" @tab-click="handleClick">
-            <el-tab-pane label="Competition Info" name="first">
+            <el-tab-pane label="Competition Info" name="first" v-if="has_competition==true">
                 <el-table :data="table" style="width: 100%">
                     <el-table-column prop="name" label="Name" width="130" />
                     <el-table-column prop="deadline" label="Deadline" width="230" />
@@ -185,7 +185,7 @@
 <script lang="ts">
 import {defineComponent, reactive, ref} from 'vue'
 import {ElMessage, ElMessageBox, ElNotification} from "element-plus";
-import {postCompetitionApi, getCompetitionApi, putCompetitionApi} from "@/api/competition";
+import {postCompetitionApi, getCompetitionApi, putCompetitionApi, hasCompetitionApi} from "@/api/competition";
 import store from "@/store";
 import axios from "axios";
 import {config} from "@/utils/config";
@@ -295,14 +295,18 @@ export default defineComponent ({
                         duration: 1500
                     })
                 } else {
-                    ElNotification({
-                        title: 'Error',
-                        message: 'Update competition failed',
-                        type: 'error',
-                        duration: 1500
-                    })
-                    this.loading = false
+                    let reference_query = (document.getElementById("reference_query") as HTMLInputElement);
+                    reference_query.value = ''
+                    let private_sql = (document.getElementById("private_sql") as HTMLInputElement);
+                    private_sql.value = ''
+                    let competitor_info = (document.getElementById("competitor_info") as HTMLInputElement);
+                    competitor_info.value = ''
+                    let public_sql = (document.getElementById("public_sql") as HTMLInputElement);
+                    public_sql.value = ''
                     this.role = "administrator"
+                    this.updateData = null
+                    this.updateData = new FormData()
+                    this.loading = false
                 }
             })
         },
@@ -365,15 +369,18 @@ export default defineComponent ({
                         duration: 1500
                     })
                 } else {
+                    let reference_query = (document.getElementById("reference_query") as HTMLInputElement);
+                    reference_query.value = ''
+                    let private_sql = (document.getElementById("private_sql") as HTMLInputElement);
+                    private_sql.value = ''
+                    let competitor_info = (document.getElementById("competitor_info") as HTMLInputElement);
+                    competitor_info.value = ''
+                    let public_sql = (document.getElementById("public_sql") as HTMLInputElement);
+                    public_sql.value = ''
+                    this.formData = null
                     this.role = "administrator"
-                    ElNotification({
-                        title: 'Error',
-                        message: 'A competition already exist',
-                        type: 'error',
-                        duration: 1500
-                    })
                     this.loading = false
-                    this.role = "administrator"
+                    this.formData = new FormData()
                 }
             })
         },
@@ -444,7 +451,7 @@ export default defineComponent ({
             table: [],
             createDialog: false,
             updateDialog: false,
-            activeName: "first",
+            activeName: "second",
             role: "",
             competition_id: -1,
             updateData: new FormData()
@@ -452,36 +459,48 @@ export default defineComponent ({
     },
     created() {
         //this.role = store.getters.getRole
-        this.role = sessionStorage.getItem('role')
-        getCompetitionApi().then((res:any) => {
-            if (res.id != null) {
-                this.competition_id = res.id
-                this.form.name = res.name
-                this.form.concurrent_limit = res.concurrent_limit
-                this.form.description = res.description
-                this.form.running_time_limit = res.running_time_limit
-                this.form.upload_limit = res.upload_limit
-                if (res.descendent_ordering) {
-                    this.descendent = true
-                } else {
-                    this.descendent = false
-                }
-                this.deadlinePlaceholder = res.end_time
+        console.log("has competition: ")
+        console.log(this.has_competition)
+        hasCompetitionApi().then((res:any) => {
+            console.log("res.has_competition: ")
+            console.log(res.has_competition)
+            if (res.has_competition == true) {
                 this.has_competition = true
-                this.tableData.name = res.name
-                this.tableData.concurrent_limit = res.concurrent_limit
-                this.tableData.description = res.description
-                this.tableData.running_time_limit = res.running_time_limit
-                this.tableData.upload_limit = res.upload_limit
-                if (res.descendent_ordering) {
-                    this.tableData.ordering = "descendent"
-                } else {
-                    this.tableData.ordering = "ascendant"
-                }
-                this.tableData.deadline = res.end_time
-                this.table.push(this.tableData)
             } else {
-                this.role = "administrator"
+                this.has_competition = false
+            }
+            console.log("after: ")
+            console.log(this.has_competition)
+            this.role = sessionStorage.getItem('role')
+            if (this.has_competition == true) {
+                getCompetitionApi().then((res:any) => {
+                    this.activeName = "first"
+                    this.competition_id = res.id
+                    this.form.name = res.name
+                    this.form.concurrent_limit = res.concurrent_limit
+                    this.form.description = res.description
+                    this.form.running_time_limit = res.running_time_limit
+                    this.form.upload_limit = res.upload_limit
+                    if (res.descendent_ordering) {
+                        this.descendent = true
+                    } else {
+                        this.descendent = false
+                    }
+                    this.deadlinePlaceholder = res.end_time
+                    this.has_competition = true
+                    this.tableData.name = res.name
+                    this.tableData.concurrent_limit = res.concurrent_limit
+                    this.tableData.description = res.description
+                    this.tableData.running_time_limit = res.running_time_limit
+                    this.tableData.upload_limit = res.upload_limit
+                    if (res.descendent_ordering) {
+                        this.tableData.ordering = "descendent"
+                    } else {
+                        this.tableData.ordering = "ascendant"
+                    }
+                    this.tableData.deadline = res.end_time
+                    this.table.push(this.tableData)
+                })
             }
         })
     }

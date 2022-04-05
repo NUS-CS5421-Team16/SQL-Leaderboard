@@ -50,16 +50,8 @@ export default defineComponent({
     methods: {
         loginFunc() {
             loginApi(this.username, this.password).then((res:any) => {
-                console.log("res: " + res)
                 if (res.token != null) {
                     this.$router.push({path: "/leaderboard"})
-                } else {
-                    ElNotification({
-                        title: 'Error',
-                        message: 'Please register',
-                        type: 'error',
-                        duration: 1500
-                    })
                 }
             })
         }
