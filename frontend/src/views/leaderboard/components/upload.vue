@@ -3,6 +3,7 @@
         ref="uploadRef"
         class="upload-demo"
         name="sql"
+        :headers="headers"
         :action="actionUrl"
         :auto-upload="false"
         :before-upload="beforeUpload"
@@ -21,6 +22,7 @@
 <script lang="ts" setup>
 import { ref, defineProps, defineEmit, reactive, computed } from 'vue';
 import { useStore } from "vuex";
+import store from "@/store";
 import { ElMessageBox } from 'element-plus'
 import { config } from '@/utils/config'
 
@@ -28,7 +30,8 @@ const emit = defineEmit(['uploadSuccess'])
 
 const uploadRef = ref()
 
-const store = useStore();
+const token = "Token " + sessionStorage.getItem('token');
+const headers = { Authorization: token };
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
 })
@@ -46,7 +49,7 @@ const handleSuccess = (res: any) => {
 
 const handleError = (err: any) => {
     uploadRef.value.clearFiles()
-    alertMsg();
+    alertMsg(err.toString());
 }
 
 const handleChange = (file: any, files: any) => {
@@ -66,8 +69,8 @@ const beforeUpload = (file: any) => {
 }
 
 // message alert
-const alertMsg = () => {
-    ElMessageBox.alert('Please note that the file must not contain dangerous operations!', 'alert');
+const alertMsg = (msg: string) => {
+    ElMessageBox.alert(msg, 'WARNING');
 }
 </script>
 
