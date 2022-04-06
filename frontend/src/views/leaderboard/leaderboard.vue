@@ -99,6 +99,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import upload from './components/upload.vue'
 import { config } from "@/utils/config";
 import axios from "axios";
+import store from '@/store';
 
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
