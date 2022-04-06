@@ -29,29 +29,29 @@
                 </vxe-table>
             </el-tab-pane>
             <el-tab-pane label="Leaderboard-Private" name="second">
-            <!-- <el-tab-pane label="Leaderboard Private" name="second" v-if="isCompetiionEnd"> -->
-            <vxe-table
-                :data="privateTableData"
-                v-loading="loading"
-                empty-text="No data"
-                v-if="tabChoose === 'second'"
-            >
-              <vxe-table-column field="index" title="#"></vxe-table-column>
-              <vxe-table-column field="team_name" title="Team Name"></vxe-table-column>
-              <vxe-table-column field="entries" title="Entries"></vxe-table-column>
-              <vxe-table-column title="Time">
-                <template #default="scope">
+                <!-- <el-tab-pane label="Leaderboard Private" name="second" v-if="isCompetiionEnd"> -->
+                <vxe-table
+                    :data="privateTableData"
+                    v-loading="loading"
+                    empty-text="No data"
+                    v-if="tabChoose === 'second'"
+                >
+                    <vxe-table-column field="index" title="#"></vxe-table-column>
+                    <vxe-table-column field="team_name" title="Team Name"></vxe-table-column>
+                    <vxe-table-column field="entries" title="Entries"></vxe-table-column>
+                    <vxe-table-column title="Time">
+                        <template #default="scope">
                             <span
                                 v-if="scope.row.running_time && scope.row.running_time !== '-'"
                             >{{ scope.row.running_time }}ms</span>
-                  <span
-                      v-else-if="scope.row.running_time && scope.row.running_time === '-'"
-                  >-</span>
-                </template>
-              </vxe-table-column>
-            </vxe-table>
-          </el-tab-pane>
-            <el-tab-pane label="Current User Result" name="third">
+                            <span
+                                v-else-if="scope.row.running_time && scope.row.running_time === '-'"
+                            >-</span>
+                        </template>
+                    </vxe-table-column>
+                </vxe-table>
+            </el-tab-pane>
+            <el-tab-pane label="Current User Result" name="third" v-if="!isAdmin">
                 <vxe-table
                     :data="userTableData"
                     v-loading="loading"
@@ -93,24 +93,26 @@
 
 <script lang="ts" setup>
 import { ref, onMounted, reactive, computed } from 'vue';
-import { useStore } from "vuex";
-import { getCompetitionRank, getCompetitor } from '@/api';
+import { getCompetitionRank, getCompetitor, hasCompetitionApi } from '@/api';
 // import { getCompetitionRank, getCompetitor, getCompetitionApi } from '@/api';
 import { ElMessage, ElMessageBox } from 'element-plus'
 import upload from './components/upload.vue'
 import { config } from "@/utils/config";
 import axios from "axios";
 
-const store = useStore();
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
+    role: computed(() => sessionStorage.getItem('role')),
 })
+
+const isAdmin = computed(() => state.role === 'administrator');
 
 const publicTableData = ref([]);
 const privateTableData = ref([]);
 const userTableData = ref([]);
 const loading = ref(false);
 const tabChoose = ref('first');
+const hasCompetition = ref(true);
 // const isCompetiionEnd = ref(false);
 
 const handleClick = () => {
@@ -124,6 +126,7 @@ const handleClick = () => {
 }
 
 const getPublicRankList = async () => {
+    if (!hasCompetition.value) return;
     loading.value = true;
     const params = {
         private: 0,
@@ -144,19 +147,21 @@ const getPublicRankList = async () => {
 }
 
 const getPrivateRankList = async () => {
+    if (!hasCompetition.value) return;
     loading.value = true;
     const params = {
-      private: 1,
+        private: 1,
     }
     const res = await getCompetitionRank(params);
     privateTableData.value = formatData(res) || [];
     // set loading
     setTimeout(() => {
-      loading.value = false;
+        loading.value = false;
     }, 300);
 }
 
 const getCompetitorTask = async () => {
+    if (!hasCompetition.value) return;
     const res = await getCompetitor(sessionStorage.getItem('cid'));
 
     const tasks = (res as any).tasks || [];
@@ -239,7 +244,9 @@ const showMsg = (msg: string) => {
 
 // dom ready
 onMounted(async () => {
-    getPublicRankList();
+    const hasCompetitionRes: any = await hasCompetitionApi()
+    hasCompetition.value = hasCompetitionRes.has_competition
+    await getPublicRankList();
 })
 </script>
 
