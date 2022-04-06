@@ -4,6 +4,7 @@ import { setDefaultRoute } from "@/utils/recursion-router";
 
 import router, { DynamicRoutes } from "@/router/index";
 import view from "@/components/view/view.vue";
+import store from ".";
 function typeOf(obj: any): any {
     const toString: any = Object.prototype.toString;
     const map: any = {
@@ -52,6 +53,20 @@ const actions = {
         let children: Array<any> = [];
         children = MainContainer.children;
         children = children.concat(routes);
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                const role = sessionStorage.getItem("role");
+                console.log("current role:");
+                console.log(role);
+                if (role === "administrator") {
+                    const idx = children.findIndex(
+                        (item) => item.path === "team"
+                    );
+                    children.splice(idx, 1);
+                }
+                resolve(true);
+            }, 1000);
+        });
         commit("SET_MENU", children);
         MainContainer.children = children;
         
