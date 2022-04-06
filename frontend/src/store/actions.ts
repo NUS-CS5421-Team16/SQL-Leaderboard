@@ -53,15 +53,28 @@ const actions = {
         let children: Array<any> = [];
         children = MainContainer.children;
         children = children.concat(routes);
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                const role = sessionStorage.getItem("role");
+                if (role !== "administrator") {
+                    const idx = children.findIndex(
+                        (item) => item.path === "team"
+                    );
+                    children.splice(idx, 1);
+                }
+                resolve(true);
+            }, 500);
+        });
         commit("SET_MENU", children);
-        const stateRole = store.state.role
-        const role = sessionStorage.getItem("role");
-        console.log('stateRole', stateRole)
-        console.log('role', role)
-        if(role === 'administrator' || stateRole === 'administrator') {
-            const idx = children.findIndex(item => item.path === 'team');
-            children.splice(idx, 1);
-        }
+        // commit("SET_MENU", children);
+        // const stateRole = store.state.role
+        // const role = sessionStorage.getItem("role");
+        // console.log('stateRole', stateRole)
+        // console.log('role', role)
+        // if(role === 'administrator' || stateRole === 'administrator') {
+        //     const idx = children.findIndex(item => item.path === 'team');
+        //     children.splice(idx, 1);
+        // }
         MainContainer.children = children;
         
         setDefaultRoute([MainContainer]);
