@@ -116,6 +116,19 @@ const tabChoose = ref('first');
 const hasCompetition = ref(true);
 // const isCompetiionEnd = ref(false);
 
+if (isAdmin) {
+    let newMenu = [...store.state.sidebarMenu]
+    const idx = newMenu.findIndex(
+        (item) => item.path === "team"
+    );
+    console.log(idx)
+    if (idx != -1) {
+        newMenu.splice(idx, 1)
+        console.log(newMenu)
+        store.commit("SET_MENU", newMenu)
+    }
+}
+
 const handleClick = () => {
     if (tabChoose.value === 'first') {
         getPublicRankList();

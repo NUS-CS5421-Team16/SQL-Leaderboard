@@ -90,7 +90,7 @@ class CompetitionViewset(viewsets.ModelViewSet):
             self.clear_competition(competition_instance)
         return super(CompetitionViewset, self).destroy(request, *args, **kwargs)
 
-    @action(detail=False, methods=['GET'], permission_classes=[IsAuthenticated])
+    @action(detail=False, methods=['GET'], permission_classes=[])
     def has_competition(self, request, *agrs, **kwargs):
         competitions = Competition.objects.all()
         if competitions.exists():

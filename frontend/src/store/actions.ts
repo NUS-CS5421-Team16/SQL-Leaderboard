@@ -56,6 +56,8 @@ const actions = {
         await new Promise((resolve) => {
             setTimeout(() => {
                 const role = sessionStorage.getItem("role");
+                console.log("current role:");
+                console.log(role);
                 if (role === "administrator") {
                     const idx = children.findIndex(
                         (item) => item.path === "team"
