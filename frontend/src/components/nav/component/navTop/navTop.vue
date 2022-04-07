@@ -49,6 +49,7 @@ import { computed, defineComponent, reactive } from "vue";
 import { useStore } from "vuex";
 import screenfull from "screenfull";
 import { createRouter} from "vue-router";
+import store from '@/store';
 export default defineComponent({
     setup() {
         const store = useStore();
@@ -83,6 +84,22 @@ export default defineComponent({
         logOut() {
             this.$router.push({ path: "/login" });
             window.localStorage.removeItem("token");
+            const role = sessionStorage.getItem("role");
+            if (role === "administrator") {
+                const rawArray = {
+                    path: "team",
+                    component: () => import("@/views/team/team.vue"),
+                    name: "team",
+                    meta: {
+                        name: "Team",
+                        icon: "el-icon-user",
+                    },
+                };
+                const proxyArray = reactive(rawArray);
+                let newMenu = [...store.state.sidebarMenu];
+                newMenu.splice(1, 0, proxyArray);
+                store.commit("SET_MENU", newMenu);
+            }
             sessionStorage.clear()
         }
     }
