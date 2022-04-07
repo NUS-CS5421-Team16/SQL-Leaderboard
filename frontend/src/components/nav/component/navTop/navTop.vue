@@ -29,7 +29,7 @@
                     <!-- <img class="user-img" :src="require('@/assets/image/a.png')" alt=""> -->
                     <span class="user-name">{{username}}</span>
                 </div>
-                <div class="quit-system" @click="loginOut">
+                <div class="quit-system" @click="logOut">
                     <span class="iconfont el-icon-switch-button"></span>
                 </div>
             </div>
@@ -46,15 +46,13 @@
 </template>
 <script lang="ts">
 import { computed, defineComponent, reactive } from "vue";
-import { useRouter } from "vue-router";
 import { useStore } from "vuex";
 import screenfull from "screenfull";
 import { createRouter} from "vue-router";
-import router from "@/router";
 export default defineComponent({
     setup() {
         const store = useStore();
-        const router = useRouter();
+        //const router = useRouter();
         console.log("username: ")
         console.log(sessionStorage.getItem('name'))
         let username = sessionStorage.getItem('name')
@@ -71,11 +69,8 @@ export default defineComponent({
             screenfull.isEnabled && screenfull.toggle();
         };
         let loginOut = () => {
-            router.go(0);
             window.localStorage.removeItem("token");
-            sessionStorage.clear()
-            router.push({path:"/login"});
-            //router.replace({ path: "/login" });
+            console.log("clear session storage")
         };
         return {
             username,
@@ -84,6 +79,13 @@ export default defineComponent({
             toggleNavCollapse
         };
     },
+    methods: {
+        logOut() {
+            this.$router.push({ path: "/login" });
+            window.localStorage.removeItem("token");
+            sessionStorage.clear()
+        }
+    }
 });
 </script>
 <style lang="scss" scoped>
