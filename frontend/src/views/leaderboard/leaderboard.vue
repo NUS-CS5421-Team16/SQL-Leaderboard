@@ -100,6 +100,9 @@ import upload from './components/upload.vue'
 import { config } from "@/utils/config";
 import axios from "axios";
 import store from '@/store';
+import { useRouter, useRoute } from 'vue-router'
+
+const router = useRouter()
 
 const state = reactive({
     cid: computed(() => sessionStorage.getItem('cid')),
@@ -115,19 +118,6 @@ const loading = ref(false);
 const tabChoose = ref('first');
 const hasCompetition = ref(true);
 // const isCompetiionEnd = ref(false);
-
-if (isAdmin) {
-    let newMenu = [...store.state.sidebarMenu]
-    const idx = newMenu.findIndex(
-        (item) => item.path === "team"
-    );
-    console.log(idx)
-    if (idx != -1) {
-        newMenu.splice(idx, 1)
-        console.log(newMenu)
-        store.commit("SET_MENU", newMenu)
-    }
-}
 
 const handleClick = () => {
     if (tabChoose.value === 'first') {
@@ -206,7 +196,6 @@ const formatData = (res: any): any => {
         sortKeys.forEach(key => {
             if (key === '-1') {
                 otherTeams.push(...res[key]);
-                return;
             } else {
                 const item = res[key];
                 item.index = key;
@@ -258,6 +247,13 @@ const showMsg = (msg: string) => {
 
 // dom ready
 onMounted(async () => {
+    // const token = sessionStorage.getItem('token')
+    // if (!token) {
+    //     router.push({
+    //         name: 'login',
+    //     })
+    //     return
+    // }
     const hasCompetitionRes: any = await hasCompetitionApi()
     hasCompetition.value = hasCompetitionRes.has_competition
     await getPublicRankList();

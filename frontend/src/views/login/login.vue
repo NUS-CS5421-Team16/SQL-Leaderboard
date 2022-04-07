@@ -40,6 +40,7 @@ import {loginApi} from "@/api/login";
 import { useRouter } from 'vue-router';
 import {useStore} from "vuex";
 import {ElNotification} from "element-plus";
+import store from '@/store';
 export default defineComponent({
     data() {
         return {
@@ -49,12 +50,24 @@ export default defineComponent({
     },
     methods: {
         loginFunc() {
-            loginApi(this.username, this.password).then((res:any) => {
-                if (res.token != null) {
-                    this.$router.push({path: "/leaderboard"})
+        loginApi(this.username, this.password).then((res: any) => {
+            if (res.token != null) {
+                if (res.role === "administrator") {
+                    let newMenu = [...store.state.sidebarMenu];
+                    console.log(newMenu);
+                    const idx = newMenu.findIndex((item) => item.path === "team");
+                    console.log(idx);
+                    if (idx != -1) {
+                    newMenu.splice(idx, 1);
+                    console.log(newMenu);
+                    store.commit("SET_MENU", newMenu);
+                    }
                 }
-            })
-        }
+            
+            this.$router.push({ path: "/leaderboard" });
+            }
+        });
+        },
     }
 })
 </script>
