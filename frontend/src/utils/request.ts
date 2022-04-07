@@ -21,7 +21,7 @@ axiosNew.interceptors.request.use(
         if (config.url?.includes("/competitor/") && (config.method == "put")) {
             config.headers['Content-Type'] = 'multipart/form-data';
         }
-        if (!config.url.includes("/register/") && !config.url.includes("/login/") && sessionStorage.getItem('token') != null && sessionStorage.getItem('token') != "") {
+        if (!config.url.includes("/register/") && !config.url.includes("/login/") && sessionStorage.getItem('token') != null) {
             let token = "Token " + sessionStorage.getItem('token')
             config.headers.Authorization = token
         }
