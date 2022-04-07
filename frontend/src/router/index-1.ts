@@ -8,11 +8,17 @@ const routes: Array<RouteRecordRaw> = [
         path: "/login",
         name: "login",
         component: () => import("@/views/login/login.vue"),
+        meta: {
+            requireAuth: false
+        }
     },
     {
         path: "/register",
         name: "register",
         component: () => import("@/views/register/register.vue"),
+        meta: {
+            requireAuth: false
+        }
     },
     {
         path: "/",
@@ -47,9 +53,15 @@ const router = createRouter({
 });*/
 
 // edited by ljh
-router.beforeEach((to: any, from: any, next: any) => {
+/*router.beforeEach((to: any, from: any, next: any) => {
     NProgress.start();
     console.log("log1");
+    console.log("to")
+    console.log(to)
+    console.log("from")
+    console.log(from)
+    console.log("next")
+    console.log(next)
     /*if (to.path == "/register") {
         console.log("correct")
         return next({ path: "/register" });
@@ -60,7 +72,7 @@ router.beforeEach((to: any, from: any, next: any) => {
         return next({ path: "/login" });
     };*/
 
-    if (
+    /*if (
         window.localStorage.getItem("token") &&
         (to.path == "/login" || to.path == "/register")
     ) {
@@ -68,7 +80,7 @@ router.beforeEach((to: any, from: any, next: any) => {
         return next({ path: "/" });
     }
 
-    if (
+    /*if (
         !store.state.permissionList &&
         to.path != "/login" &&
         to.path != "/register"
@@ -79,8 +91,12 @@ router.beforeEach((to: any, from: any, next: any) => {
         });
     } else {
         next();
+    }*/
+    /*if (sessionStorage.getItem("token") == null && to.path != "/login" && to.path != "/register") {
+        console.log("no token, go to login")
+        router.push({path: "/login"})
     }
-});
+});*/
 
 router.afterEach((to: any, from: any, next: any) => {
     NProgress.done();
@@ -98,6 +114,11 @@ router.afterEach((to: any, from: any, next: any) => {
 });
 
 export const DynamicRoutes = [
+    {
+      path: "/",
+      component: () => import("@/views/login/login.vue"),
+      name: "login",
+    },
     {
         path: "",
         component: () => import("@/components/nav/nav.vue"),
