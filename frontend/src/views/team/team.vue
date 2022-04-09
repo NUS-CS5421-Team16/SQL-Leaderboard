@@ -60,8 +60,11 @@ const onSubmit = async () => {
     submitted_data.append('team_name', form.team_name)
     submitted_data.append('team_uuid', form.team_uuid)
     const res = await updateTeam(sessionStorage.getItem('cid'), submitted_data)
-    if (res) {
-        ElMessage.success('update Success')
+    if (res === -1) {
+        ElMessage.error('Update failed')
+    }
+    else {
+        ElMessage.success('Update Success')
     }
     getDetail()
 }

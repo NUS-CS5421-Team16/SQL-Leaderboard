@@ -49,7 +49,7 @@ const handleSuccess = (res: any) => {
 
 const handleError = (err: any) => {
     uploadRef.value.clearFiles()
-    alertMsg(err.toString());
+    alertMsg(JSON.parse(err.message));
 }
 
 const handleChange = (file: any, files: any) => {
@@ -69,8 +69,8 @@ const beforeUpload = (file: any) => {
 }
 
 // message alert
-const alertMsg = (msg: string) => {
-    ElMessageBox.alert(msg, 'WARNING');
+const alertMsg = (msg: any) => {
+    ElMessageBox.alert(msg.message, 'WARNING');
 }
 </script>
 
