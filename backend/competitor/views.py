@@ -148,8 +148,8 @@ class CompetitorViewset(viewsets.ModelViewSet):
                         target_team.best_public_task = current_team.best_public_task
                     elif not is_desc and target_team.best_public_task.result > current_team.best_public_task.result:
                         target_team.best_public_task = current_team.best_public_task
-                total_used_times = 10 - (target_team.remain_upload_times+current_team.remain_upload_times)
-                target_team.remain_upload_times = max(0, 5 - total_used_times)
+                total_used_times = competitor.competition.upload_limit * 2 - (target_team.remain_upload_times+current_team.remain_upload_times)
+                target_team.remain_upload_times = max(0, competitor.competition.upload_limit - total_used_times)
                 target_team.entries = target_team.entries + current_team.entries
                 target_team.save()
                 current_teammates = Competitor.objects.filter(team=current_team)
