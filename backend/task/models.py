@@ -155,7 +155,8 @@ class QueryTask(Task):
                     self.save()
 
                 # update best_task of the team if needed
-                if best_task is None or best_task.result > self.result:
+                if best_task is None or (not self.competitor.competition.descendent_ordering and best_task.result > self.result) \
+                        or (self.competitor.competition.descendent_ordering and best_task.result < self.result):
                     print("set best")
                     setattr(team, 'best_%s_task' % database, self)
                     team.save()
