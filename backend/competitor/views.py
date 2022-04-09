@@ -84,7 +84,7 @@ class CompetitorViewset(viewsets.ModelViewSet):
         competitor_instance = Competitor.objects.get(id=user_id)
 
         team = competitor_instance.team
-        tasks = QueryTask.objects.filter(competitor__team=team).order_by("start_time")
+        tasks = QueryTask.objects.filter(competitor__team=team).order_by("-start_time")
         tasks_serializer = QueryTaskSerializer(tasks, many=True)
         tasks_data = tasks_serializer.data
         for each in tasks_data:
